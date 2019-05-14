@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-##### COMPOSE ORM #####
+##### COMPOSE ORM ############################################################
 
 class Facility(db.Model):
     """Class model for facility information"""
@@ -121,22 +121,12 @@ class CitationDefinition(db.Model):
                     """
 
 
-##############################################################################
-##### Helper functions #####
-
-def init_app():
-    """Flask app for use of SQL Alchemy"""
-    from flask import Flask
-    app = Flask(__name__)
-
-    connect_to_db(app)
-    print("Connected to DB.")
-
+##### Helper functions ########################################################
 
 def connect_to_db(app):
     """Connect the database to our Flask app."""
 
-    # Configure to use our database.
+    # Configure to use PostgreSQL database.
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///project'
     app.config['SQLALCHEMY_ECHO'] = False
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -148,4 +138,7 @@ if __name__ == "__main__":
     # If you run this module interactively, you will be able to work 
     # with the database directly.
 
-    init_app()
+    from server import app
+    connect_to_db(app)
+    print("Connected to DB.")
+
