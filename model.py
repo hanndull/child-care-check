@@ -26,29 +26,32 @@ class Facility(db.Model):
     def __repr__ (self):
         """Display info about facility"""
 
-        return f"""<facility_id={facility_id} facility_type={facility_type} 
-                    facility_name={facility_name} facility_zip={facility_zip}
-                    facility_status={facility_status} 
-                    complaint_count={complaint_count}>
+        return f"""<facility_id={self.facility_id} 
+                    facility_type={self.facility_type} 
+                    facility_name={self.facility_name} 
+                    facility_zip={self.facility_zip}
+                    facility_status={self.facility_status} 
+                    complaint_count={self.complaint_count}>
                     """
 
 
 class Visitation(db.Model):
     """Class model for facility visitations"""
 
-    __tablename__ = 'violations'
+    __tablename__ = 'visitations'
 
     visitation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    visitation_date = 
-    is_inspection = 
-    facility_id = 
+    visitation_date = db.Column(db.DateTime(timezone=False), nullable=False)
+    is_inspection = db.Column(db.Boolean, nullable=False)
+    facility_id = db.Column(db.Integer, 
+                    ForeignKey('facilities.facility_id'), nullable=False)
 
     def __repr__(self):
         """Info about visitation"""
 
-        return f"""<visitation_id={visitation_id} 
-                    visitation_date={visitation_date}
-                    facility_id= {facility_id}>
+        return f"""<visitation_id={self.visitation_id} 
+                    visitation_date={self.visitation_date}
+                    facility_id= {self.facility_id}>
                     """
 
 
@@ -58,17 +61,22 @@ class Citation(db.Model):
     __tablename__ = 'citations'
 
     citation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    citation_date = 
-    visitation_id = 
-    citation_type = 
-    citation_code = 
-    facility_id = 
+    citation_date = db.Column(db.DateTime(timezone=False), nullable=False)
+    visitation_id = db.Column(db.Integer, 
+                    ForeignKey('visitations.visitation_id'), nullable=True)
+    citation_type = db.Column(db.String(1), nullable=False) # TODO - look into whether this should be nullable
+    citation_code = db.Column(db.String, 
+                    ForeignKey('cit_definitions.citation_code'), nullable=False)
+    facility_id = db.Column(db.Integer, 
+                    ForeignKey('facilities.facility_id'), nullable=False)
 
     def __repr__(self):
         """Info about citation"""
 
-        return f"""<citation_id={citation_id} citation_date={citation_date}
-                    citation_type={citation_type} citation_code={citation_code}>
+        return f"""<citation_id={self.citation_id} 
+                    citation_date={self.citation_date}
+                    citation_type={self.citation_type} 
+                    citation_code={self.citation_code}>
                     """
 
 
@@ -78,16 +86,17 @@ class CitationDefinitions(db.Model):
     __tablename__ = 'cit_definitions'
 
     cit_def_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    citation_code = 
-    citation_description = 
-    citation_url = 
+    citation_code = db.Column(db.String, nullable=False)
+    citation_description = db.Column(db.String, nullable=False)
+    citation_url = db.Column(db.String, nullable=False)
 
     def __repr__(self):
         """Info about citation definition"""
 
-        return f"""<cit_def_id={cit_def_id} citation_code={citation_code}
-                    citation_description={citation_description}
-                    citation_url={citation_url}
+        return f"""<cit_def_id={self.cit_def_id} 
+                    citation_code={self.citation_code}
+                    citation_description={self.citation_description}
+                    citation_url={self.citation_url}
                     """
 
 
