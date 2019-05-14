@@ -17,9 +17,9 @@ class Facility(db.Model):
     facility_phone = db.Column(db.String(20), nullable=True) # TODO - check on phone num as str
     facility_address = db.Column(db.String, nullable=True) # TODO - check on address as nullable
     facility_state = db.Column(db.String(2), nullable=False)
-    facility_zip = db.Column(db.Integer(5), nullable=False)
+    facility_zip = db.Column(db.Integer, nullable=False)
     facility_county = db.Column(db.String, nullable=True)
-    facility_capacity = db.Column(db.Integer(5), nullable=False)
+    facility_capacity = db.Column(db.Integer, nullable=False)
     complaint_count = db.Column(db.Integer,nullable=False)
     facility_status = db.Column(db.String, nullable=False)
 
@@ -50,7 +50,7 @@ class Visitation(db.Model):
     visitation_date = db.Column(db.DateTime(timezone=False), nullable=False)
     is_inspection = db.Column(db.Boolean, nullable=False)
     facility_id = db.Column(db.Integer, 
-                    ForeignKey('facilities.facility_id'), nullable=False)
+                    db.ForeignKey('facilities.facility_id'), nullable=False)
 
     
     ### DB Relationships ###
@@ -75,12 +75,12 @@ class Citation(db.Model):
     citation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     citation_date = db.Column(db.DateTime(timezone=False), nullable=False)
     visitation_id = db.Column(db.Integer, 
-                    ForeignKey('visitations.visitation_id'), nullable=True)
+                    db.ForeignKey('visitations.visitation_id'), nullable=True)
     citation_type = db.Column(db.String(1), nullable=False) # TODO - look into whether this should be nullable
     citation_code = db.Column(db.String, 
-                    ForeignKey('cit_definitions.citation_code'), nullable=False)
+                    db.ForeignKey('cit_definitions.citation_code'), nullable=False)
     facility_id = db.Column(db.Integer, 
-                    ForeignKey('facilities.facility_id'), nullable=False)
+                    db.ForeignKey('facilities.facility_id'), nullable=False)
 
     ### DB Relationships ###
     visitations = db.relationship('Visitation', backref='citations')
