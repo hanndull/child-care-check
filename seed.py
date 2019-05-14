@@ -1,4 +1,4 @@
-"""Utility file to seed data into project db from CA state data in excel/"""
+"""Utility file to seed data into project db from CA state data in seed_data/"""
 
 
 ##### Import Libraries #######################################################
@@ -12,12 +12,29 @@ from datetime import datetime
 
 ##### Load Data to DB ########################################################
 
-def load_facilities():
+def load_facilities(file):
     """Load facilities from file""" 
     ### TO DO - Figure out how the 2 files will be parsed
     ### Maybe add file name param??
 
     ### TO DO - Add logic here
+
+    User.query.delete()
+    # Delete all rows in table to avoid adding duplicate users
+  
+    for row in open(f"seed_data/{file}"):
+        # Read file and insert data
+        row = row.rstrip()
+        #[TO DO - list all table name fields here] = row.split("|")
+
+        facility = Facility( #TO DO - list all fields here
+                            )
+
+        db.session.add(facility) # add to the sql session
+
+    db.session.commit()
+
+
 
     print ('<<<<<<<<<<<<<<<< facilities loaded >>>>>>>>>>>>>>>>>>>')
 
