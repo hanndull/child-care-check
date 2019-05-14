@@ -76,7 +76,9 @@ class Citation(db.Model):
     citation_date = db.Column(db.DateTime(timezone=False), nullable=False)
     visitation_id = db.Column(db.Integer, 
                     db.ForeignKey('visitations.visitation_id'), nullable=True)
-    citation_type = db.Column(db.String(1), nullable=False) # TODO - look into whether this should be nullable
+                    #Keeping nullable for now (for dates that don't match up btwn citation and visitation)
+                    #Check into percentage of NULL cells here after seeded & re-evaluate
+    citation_type = db.Column(db.String(1), nullable=False) 
     citation_code = db.Column(db.String, 
                     db.ForeignKey('cit_definitions.citation_code'), nullable=False)
     facility_id = db.Column(db.Integer, 
