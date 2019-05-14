@@ -23,6 +23,12 @@ class Facility(db.Model):
     complaint_count = db.Column(db.Integer,nullable=False)
     facility_status = db.Column(db.String, nullable=False)
 
+    
+    ### DB Relationships ###
+        # visitations --> Visitation Class
+        # citations --> Citation Class
+
+
     def __repr__ (self):
         """Display info about facility"""
 
@@ -45,6 +51,12 @@ class Visitation(db.Model):
     is_inspection = db.Column(db.Boolean, nullable=False)
     facility_id = db.Column(db.Integer, 
                     ForeignKey('facilities.facility_id'), nullable=False)
+
+    
+    ### DB Relationships ###
+    facilities = db.relationship('Facility', backref='visitations')
+    # citations --> Citation Class
+
 
     def __repr__(self):
         """Info about visitation"""
@@ -70,6 +82,12 @@ class Citation(db.Model):
     facility_id = db.Column(db.Integer, 
                     ForeignKey('facilities.facility_id'), nullable=False)
 
+    ### DB Relationships ###
+    visitations = db.relationship('Visitation', backref='citations')
+    citation_defs = db.relationship('CitationDefinition', backref='citations')
+    facilities = db.relationship('Facility', backref='citations')
+
+
     def __repr__(self):
         """Info about citation"""
 
@@ -80,7 +98,7 @@ class Citation(db.Model):
                     """
 
 
-class CitationDefinitions(db.Model):
+class CitationDefinition(db.Model):
     """Class model for facility licensing violations"""
 
     __tablename__ = 'cit_definitions'
@@ -89,6 +107,9 @@ class CitationDefinitions(db.Model):
     citation_code = db.Column(db.String, nullable=False)
     citation_description = db.Column(db.String, nullable=False)
     citation_url = db.Column(db.String, nullable=False)
+
+    # DB Relationships ###
+        # citations --> Citation Class
 
     def __repr__(self):
         """Info about citation definition"""
