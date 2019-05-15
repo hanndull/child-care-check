@@ -18,10 +18,14 @@ def load_file(file_path):
 
         processed_file = csv.reader(csvfile, delimiter=',')
 
+        print('<<<<<<<<<<<<<<<< initiate csv row processing >>>>>>>>>>>>>>>>>>>')
+
         rows = []
 
         for row in processed_file:
             rows.append(row)
+
+        print('<<<<<<<<<<<<<<<< complete csv row processing >>>>>>>>>>>>>>>>>>>')
 
         return rows
 
@@ -66,13 +70,24 @@ def load_visitations(processed_file):
             
             facility = Facility.query.filter_by(facility_number=f'{row[1]}').one()
 
-            visitation = Visitation(
-                visitation_date = row[23],
-                is_inspection = row[24],
-                facility_id = facility.facility_id,
-                )
+            ##################### split cell by space ##########################
+            visit_list = row[23].split()
+            inspection_list = row[24].split()
 
-            db.session.add(visitation)
+            for visit_date in visit_list:
+                # Loop through list of visit dates contained in same CSV cell
+                if visit_date in inspection_list:
+                    inspection=True
+                else:
+                    inspection=False
+                
+                visitation = Visitation(
+                    visitation_date = visit_date,
+                    is_inspection = inspection,
+                    facility_id = facility.facility_id,
+                    )
+
+                db.session.add(visitation)
 
     db.session.commit()
 
@@ -85,25 +100,61 @@ def load_citations(processed_file):
     Citation.query.delete()
 
     for row in processed_file:
+        
         if row[21] != '':
+
+            facility = Facility.query.filter_by(facility_number=f'{row[1]}').one()
             
-            citation = Citation(
-                    citation_date = row[22],
-                    citation_type = row[21],
-                )
+            ##################### split cell by space ##########################
+            cit_list = row[22].split()
+            cit_type = row[21].split()
+
+            index = 0
+
+            for citation_date in cit_list:
+                # Loop through list of citation dates contained in CSV cell
+                ### TODO - Consider whether useful to count against date
+                citation_type = cit_type[index]
+
+                citation = Citation(
+                        citation_date = citation_date,
+                        citation_type = citation_type,
+                        facility_id = facility.facility_id,
+                    )
+
+                db.session.add(citation)
+                
+                if index < (len(cit_type)-1):
+                    index += 1
+
+    db.session.commit()
 
     print ('<<<<<<<<<<<<<<<< citations loaded >>>>>>>>>>>>>>>>>>>')
 
 
-def load_cit_definitions(definitions_file):
+def load_cit_definitions(processed_file):
     """Load citation definitions from file"""
     
     ### TO DO -- find way to scrape thru documentation of citation types
     # Gather into doc for this seeding
 
-    ### TO DO - Add logic here
+    CitationDefinition.query.delete()
+
+    for row in processed_file:
+        
+        ### TODO - Add in logic of how file cells will correlate to fields
+
+        cit_def = CitationDefinition(
+            cit_def_id=cit_def_id,
+            citation_code=citation_code,
+            citation_description=citation_description,
+            citation_url=citation_url,
+            )
+
+        db.session.add(cit_def)
 
     print ('<<<<<<<<<<<<<<<< cit defs loaded >>>>>>>>>>>>>>>>>>>')
+    db.session.commit()
 
 
 ##### Dunder Main ############################################################

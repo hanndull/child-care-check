@@ -101,9 +101,9 @@ class Citation(db.Model):
     visitation_id = db.Column(db.Integer, 
                     db.ForeignKey('visitations.visitation_id'), nullable=True)
     cit_def_id = db.Column(db.Integer, 
-                    db.ForeignKey('cit_definitions.cit_def_id'), nullable=False)
+                    db.ForeignKey('cit_definitions.cit_def_id'), nullable=True)
     facility_id = db.Column(db.Integer, 
-                    db.ForeignKey('facilities.facility_id'), nullable=False)
+                    db.ForeignKey('facilities.facility_id'), nullable=True)
 
     ### DB Relationships ###
     visitations = db.relationship('Visitation', backref='citations')
@@ -144,7 +144,7 @@ class CitationDefinition(db.Model):
         return f"""<cit_def_id={self.cit_def_id} 
                     citation_code={self.citation_code}
                     citation_description={self.citation_description}
-                    citation_url={self.citation_url}
+                    citation_url={self.citation_url}>
                     """
 
 
