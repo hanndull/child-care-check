@@ -7,35 +7,46 @@ from sqlalchemy import func, create_engine
 from model import db, Facility, Visitation, Citation, CitationDefinition, connect_to_db
 from server import app
 from datetime import datetime 
+import csv
 
 ##### Load Data to DB ########################################################
 
-def load_facilities(file_path):
+def load_file(file_path):
+
+    with open(file_path, newline='') as csvfile:
+        """return ea row as list of strings within an object of full document"""
+
+        processed_file = csv.reader(csvfile, delimiter=',')
+
+        rows = []
+
+        for row in processed_file:
+            rows.append(row)
+
+        return rows
+
+
+def load_facilities(processed_file):
     """Load facilities from file""" 
     ### TO DO - Figure out how the 2 files will be parsed
 
     ## Delete all rows in table to avoid adding duplicate users
     Facility.query.delete()
 
-    for row in open(file_path):
-
-        row = row.rstrip()
-        row = row.split(",")
-        
-        facility_type, facility_number, facility_name, facility_phone, facility_address, facility_state, facility_zip, facility_county, facility_capacity, complaint_count, facility_status = row
+    for row in processed_file:
         
         facility = Facility(
-                    facility_type=facility_type, 
-                    facility_number=facility_number, 
-                    facility_name=facility_name, 
-                    facility_phone=facility_phone, 
-                    facility_address=facility_address, 
-                    facility_state=facility_state, 
-                    facility_zip=facility_zip, 
-                    facility_county=facility_county, 
-                    facility_capacity=facility_capacity, 
-                    complaint_count=complaint_count, 
-                    facility_status=facility_status,
+                    facility_type = row[0],
+                    facility_number = row[1], 
+                    facility_name = row[2],
+                    facility_phone = row[5],
+                    facility_address = row[6], 
+                    facility_state = row[8], 
+                    facility_zip = row[9], 
+                    facility_county = row[10], 
+                    facility_capacity = int(row[12]),
+                    complaint_count = row[30], 
+                    facility_status = row[13],
                     )
 
         db.session.add(facility)
@@ -45,40 +56,48 @@ def load_facilities(file_path):
     print ('<<<<<<<<<<<<<<<< facilities loaded >>>>>>>>>>>>>>>>>>>')
 
 
-    ##PAST TEST CODE 
-    # with open(file_path, 'r') as file: # r = open for reading (default)
-    #     ### FROM: https://stackoverflow.com/a/34523707 + https://docs.sqlalchemy.org/en/13/core/engines.html
-    #     engine = create_engine('postgres:///test1').raw_connection() ###CHANGE TO NEW DB NAME!
-    #     cursor = engine.cursor()
-    #     command = '''COPY facilities(facility_type, facility_number, 
-    #                 facility_zip, facility_county, facility_capacity,
-    #                 facility_status, facility_complaint_visits, facility_id) 
-    #                 FROM {file_path} DELIMITER ',' CSV HEADER;)
-    #                 ''' #http://www.postgresqltutorial.com/import-csv-file-into-posgresql-table/
-        
-    #     cursor.copy_expert(command, file)
-
-    #     engine.commit()
-
-
-def load_visitations():
+def load_visitations(processed_file):
     """Load visitations from file"""
 
-    ### TO DO - Add logic here
+    Visitation.query.delete()
+
+    for row in processed_file:
+        if row[23] != '':
+            
+            facility = Facility.query.filter_by(facility_number=f'{row[1]}').one()
+
+            visitation = Visitation(
+                visitation_date = row[23],
+                is_inspection = row[24],
+                facility_id = facility.facility_id,
+                )
+
+            db.session.add(visitation)
+
+    db.session.commit()
 
     print ('<<<<<<<<<<<<<<<< visitations loaded >>>>>>>>>>>>>>>>>>>')
 
 
-def load_citations():
+def load_citations(processed_file):
     """Load citations from file"""
 
-    ### TO DO - Add logic here
+    Citation.query.delete()
+
+    for row in processed_file:
+        if row[21] != '':
+            
+            citation = Citation(
+                    citation_date = row[22],
+                    citation_type = row[21],
+                )
 
     print ('<<<<<<<<<<<<<<<< citations loaded >>>>>>>>>>>>>>>>>>>')
 
 
-def load_cit_definitions():
+def load_cit_definitions(definitions_file):
     """Load citation definitions from file"""
+    
     ### TO DO -- find way to scrape thru documentation of citation types
     # Gather into doc for this seeding
 
@@ -92,13 +111,16 @@ def load_cit_definitions():
 if __name__ == "__main__":
     connect_to_db(app)
 
-    # In case tables haven't been created, create them
+    ## In case tables haven't been created, create them
     db.create_all()
 
-    # Import different types of data ##??????
+    ## Import different types of data ##??????
 
     ## Call all seeding functions here 
-    # load_facilities('excel/facilities_test.csv')
-    # load_visitations()
-    # load_citations()
-    # load_cit_definitions()
+    processed_file = load_file('excel/fullfile_test.csv')
+    load_facilities(processed_file)
+    load_visitations(processed_file)
+    load_citations(processed_file)
+
+    # definitions_file = load_file('excel/FILENAME')
+    # load_cit_definitions(definitions_file)

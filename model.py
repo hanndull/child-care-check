@@ -47,11 +47,15 @@ class Visitation(db.Model):
     __tablename__ = 'visitations'
 
     visitation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    visitation_date = db.Column(db.DateTime(timezone=False), nullable=False) ###Not sure if just "date" works
-    is_inspection = db.Column(db.Boolean, nullable=False)
-    facility_id = db.Column(db.Integer, 
-                    db.ForeignKey('facilities.facility_id'), nullable=False)
+    # visitation_date = db.Column(db.DateTime(timezone=False), nullable=False) ###Not sure if just "date" works
+    # is_inspection = db.Column(db.Boolean, nullable=False)
+    # facility_id = db.Column(db.Integer, 
+    #                 db.ForeignKey('facilities.facility_id'), nullable=False)
 
+    visitation_date = db.Column(db.String, nullable=True) ###Not sure if just "date" works
+    is_inspection = db.Column(db.String, nullable=True)
+    facility_id = db.Column(db.Integer, 
+                    db.ForeignKey('facilities.facility_id'), nullable=True)
     
     ### DB Relationships ###
     facilities = db.relationship('Facility', backref='visitations')
@@ -72,23 +76,39 @@ class Citation(db.Model):
 
     __tablename__ = 'citations'
 
+    # citation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # citation_date = db.Column(db.DateTime(timezone=False), nullable=False)
+    # visitation_id = db.Column(db.Integer, 
+    #                 db.ForeignKey('visitations.visitation_id'), nullable=True)
+    #                 #Keeping nullable for now (for dates that don't match up btwn citation and visitation)
+    #                 #Check into percentage of NULL cells here after seeded & re-evaluate
+    # citation_type = db.Column(db.String(1), nullable=False) 
+    # # citation_code = db.Column(db.String, 
+    # #                 db.ForeignKey('cit_definitions.citation_code'), nullable=False)
+    # cit_def_id = db.Column(db.Integer, 
+    #                 db.ForeignKey('cit_definitions.cit_def_id'), nullable=False)
+    # facility_id = db.Column(db.Integer, 
+    #                 db.ForeignKey('facilities.facility_id'), nullable=False)
+
+    # ### DB Relationships ###
+    # visitations = db.relationship('Visitation', backref='citations')
+    # cit_definitions = db.relationship('CitationDefinition', backref='citations')
+    # facilities = db.relationship('Facility', backref='citations')
+
     citation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    citation_date = db.Column(db.DateTime(timezone=False), nullable=False)
+    citation_date = db.Column(db.String, nullable=False)
+    citation_type = db.Column(db.String, nullable=False)     
     visitation_id = db.Column(db.Integer, 
                     db.ForeignKey('visitations.visitation_id'), nullable=True)
-                    #Keeping nullable for now (for dates that don't match up btwn citation and visitation)
-                    #Check into percentage of NULL cells here after seeded & re-evaluate
-    citation_type = db.Column(db.String(1), nullable=False) 
-    citation_code = db.Column(db.String, 
-                    db.ForeignKey('cit_definitions.citation_code'), nullable=False)
+    cit_def_id = db.Column(db.Integer, 
+                    db.ForeignKey('cit_definitions.cit_def_id'), nullable=False)
     facility_id = db.Column(db.Integer, 
                     db.ForeignKey('facilities.facility_id'), nullable=False)
 
     ### DB Relationships ###
     visitations = db.relationship('Visitation', backref='citations')
-    citation_defs = db.relationship('CitationDefinition', backref='citations')
+    cit_definitions = db.relationship('CitationDefinition', backref='citations')
     facilities = db.relationship('Facility', backref='citations')
-
 
     def __repr__(self):
         """Info about citation"""
@@ -105,10 +125,15 @@ class CitationDefinition(db.Model):
 
     __tablename__ = 'cit_definitions'
 
+    # cit_def_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    # citation_code = db.Column(db.String, nullable=False)
+    # citation_description = db.Column(db.String, nullable=False)
+    # citation_url = db.Column(db.String, nullable=False)
+
     cit_def_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    citation_code = db.Column(db.String, nullable=False)
-    citation_description = db.Column(db.String, nullable=False)
-    citation_url = db.Column(db.String, nullable=False)
+    citation_code = db.Column(db.String, nullable=True)
+    citation_description = db.Column(db.String, nullable=True)
+    citation_url = db.Column(db.String, nullable=True)
 
     # DB Relationships ###
         # citations --> Citation Class
@@ -129,7 +154,7 @@ def connect_to_db(app):
     """Connect the database to our Flask app."""
 
     # Configure to use PostgreSQL database.
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///test2' ##TO DO - update 
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///test3' ##TO DO - update 
     app.config['SQLALCHEMY_ECHO'] = False
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
