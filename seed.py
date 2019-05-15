@@ -3,40 +3,62 @@
 
 ##### Import Libraries #######################################################
 
-from sqlalchemy import func 
-from model import connect_to_db, db, Facility, Visitation, 
-                    Citation, CitationDefinition
+from sqlalchemy import func, create_engine
+from model import db, Facility, Visitation, Citation, CitationDefinition, connect_to_db
 from server import app
 from datetime import datetime 
 
-
 ##### Load Data to DB ########################################################
 
-def load_facilities(file):
+def load_facilities(file_path):
     """Load facilities from file""" 
     ### TO DO - Figure out how the 2 files will be parsed
-    ### Maybe add file name param??
 
-    ### TO DO - Add logic here
+    ## Delete all rows in table to avoid adding duplicate users
+    Facility.query.delete()
 
-    User.query.delete()
-    # Delete all rows in table to avoid adding duplicate users
-  
-    for row in open(f"seed_data/{file}"):
-        # Read file and insert data
+    for row in open(file_path):
+
         row = row.rstrip()
-        #[TO DO - list all table name fields here] = row.split("|")
+        row = row.split(",")
+        
+        facility_type, facility_number, facility_name, facility_phone, facility_address, facility_state, facility_zip, facility_county, facility_capacity, complaint_count, facility_status = row
+        
+        facility = Facility(
+                    facility_type=facility_type, 
+                    facility_number=facility_number, 
+                    facility_name=facility_name, 
+                    facility_phone=facility_phone, 
+                    facility_address=facility_address, 
+                    facility_state=facility_state, 
+                    facility_zip=facility_zip, 
+                    facility_county=facility_county, 
+                    facility_capacity=facility_capacity, 
+                    complaint_count=complaint_count, 
+                    facility_status=facility_status,
+                    )
 
-        facility = Facility( #TO DO - list all fields here
-                            )
-
-        db.session.add(facility) # add to the sql session
+        db.session.add(facility)
 
     db.session.commit()
 
-
-
     print ('<<<<<<<<<<<<<<<< facilities loaded >>>>>>>>>>>>>>>>>>>')
+
+
+    ##PAST TEST CODE 
+    # with open(file_path, 'r') as file: # r = open for reading (default)
+    #     ### FROM: https://stackoverflow.com/a/34523707 + https://docs.sqlalchemy.org/en/13/core/engines.html
+    #     engine = create_engine('postgres:///test1').raw_connection() ###CHANGE TO NEW DB NAME!
+    #     cursor = engine.cursor()
+    #     command = '''COPY facilities(facility_type, facility_number, 
+    #                 facility_zip, facility_county, facility_capacity,
+    #                 facility_status, facility_complaint_visits, facility_id) 
+    #                 FROM {file_path} DELIMITER ',' CSV HEADER;)
+    #                 ''' #http://www.postgresqltutorial.com/import-csv-file-into-posgresql-table/
+        
+    #     cursor.copy_expert(command, file)
+
+    #     engine.commit()
 
 
 def load_visitations():
@@ -73,10 +95,10 @@ if __name__ == "__main__":
     # In case tables haven't been created, create them
     db.create_all()
 
-    # Import different types of data
+    # Import different types of data ##??????
 
-    # Call all seeding functions here 
-    load_facilities()
-    load_visitations()
-    load_citations()
-    load_cit_definitions()
+    ## Call all seeding functions here 
+    # load_facilities('excel/facilities_test.csv')
+    # load_visitations()
+    # load_citations()
+    # load_cit_definitions()

@@ -11,19 +11,19 @@ class Facility(db.Model):
     __tablename__ = 'facilities'
 
     facility_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    facility_type = db.Column(db.String(30), nullable=False)
-    facility_number = db.Column(db.String(12), nullable=False)
+    facility_type = db.Column(db.String, nullable=False)
+    facility_number = db.Column(db.String, nullable=False)
     facility_name = db.Column(db.String, nullable=False)
-    facility_phone = db.Column(db.String(20), nullable=True) # TODO - check on phone num as str
+    facility_phone = db.Column(db.String, nullable=True) # TODO - check on phone num as str
     facility_address = db.Column(db.String, nullable=True) # TODO - check on address as nullable
-    facility_state = db.Column(db.String(2), nullable=False)
-    facility_zip = db.Column(db.Integer, nullable=False)
+    facility_state = db.Column(db.String, nullable=False)
+    facility_zip = db.Column(db.String, nullable=False) #TODO - change to int once data is cleaned
     facility_county = db.Column(db.String, nullable=True)
     facility_capacity = db.Column(db.Integer, nullable=False)
-    complaint_count = db.Column(db.Integer,nullable=False)
+    complaint_count = db.Column(db.String,nullable=False) #TO DO - update this field
     facility_status = db.Column(db.String, nullable=False)
 
-    
+
     ### DB Relationships ###
         # visitations --> Visitation Class
         # citations --> Citation Class
@@ -47,7 +47,7 @@ class Visitation(db.Model):
     __tablename__ = 'visitations'
 
     visitation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    visitation_date = db.Column(db.DateTime(timezone=False), nullable=False)
+    visitation_date = db.Column(db.DateTime(timezone=False), nullable=False) ###Not sure if just "date" works
     is_inspection = db.Column(db.Boolean, nullable=False)
     facility_id = db.Column(db.Integer, 
                     db.ForeignKey('facilities.facility_id'), nullable=False)
@@ -129,7 +129,7 @@ def connect_to_db(app):
     """Connect the database to our Flask app."""
 
     # Configure to use PostgreSQL database.
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///project'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///test2' ##TO DO - update 
     app.config['SQLALCHEMY_ECHO'] = False
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
