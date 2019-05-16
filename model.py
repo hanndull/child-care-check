@@ -19,7 +19,7 @@ class Facility(db.Model):
     facility_state = db.Column(db.String, nullable=False)
     facility_zip = db.Column(db.String, nullable=False) #TODO - change to int once data is cleaned
     facility_county = db.Column(db.String, nullable=True)
-    facility_capacity = db.Column(db.Integer, nullable=False)
+    facility_capacity = db.Column(db.String, nullable=False) #TODO - change back to int
     complaint_count = db.Column(db.String,nullable=False) #TO DO - update this field
     facility_status = db.Column(db.String, nullable=False)
 
@@ -154,7 +154,7 @@ def connect_to_db(app):
     """Connect the database to our Flask app."""
 
     # Configure to use PostgreSQL database.
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///test3' ##TO DO - update 
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///violations' ##TO DO - update 
     app.config['SQLALCHEMY_ECHO'] = False
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app

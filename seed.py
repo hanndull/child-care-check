@@ -15,6 +15,7 @@ def load_file(file_path):
 
     with open(file_path, newline='') as csvfile:
         """return ea row as list of strings within an object of full document"""
+        ### NOTE: prior to loading doc, should wrap commas in cells with quotes
 
         processed_file = csv.reader(csvfile, delimiter=',')
 
@@ -32,23 +33,24 @@ def load_file(file_path):
 
 def load_facilities(processed_file):
     """Load facilities from file""" 
-    ### TO DO - Figure out how the 2 files will be parsed
-
-    ## Delete all rows in table to avoid adding duplicate users
-    Facility.query.delete()
 
     for row in processed_file:
         
+        name = ""
+        for char in row[2]:
+            if char != "'":
+                name += char
+
         facility = Facility(
                     facility_type = row[0],
                     facility_number = row[1], 
-                    facility_name = row[2],
+                    facility_name = name,
                     facility_phone = row[5],
                     facility_address = row[6], 
                     facility_state = row[8], 
                     facility_zip = row[9], 
                     facility_county = row[10], 
-                    facility_capacity = int(row[12]),
+                    facility_capacity = row[12],
                     complaint_count = row[30], 
                     facility_status = row[13],
                     )
@@ -63,16 +65,14 @@ def load_facilities(processed_file):
 def load_visitations(processed_file):
     """Load visitations from file"""
 
-    Visitation.query.delete()
-
     for row in processed_file:
         if row[23] != '':
             
             facility = Facility.query.filter_by(facility_number=f'{row[1]}').one()
 
             ##################### split cell by space ##########################
-            visit_list = row[23].split()
-            inspection_list = row[24].split()
+            visit_list = row[23].split("','")
+            inspection_list = row[24].split("','")
 
             for visit_date in visit_list:
                 # Loop through list of visit dates contained in same CSV cell
@@ -97,8 +97,6 @@ def load_visitations(processed_file):
 def load_citations(processed_file):
     """Load citations from file"""
 
-    Citation.query.delete()
-
     for row in processed_file:
         
         if row[21] != '':
@@ -106,13 +104,14 @@ def load_citations(processed_file):
             facility = Facility.query.filter_by(facility_number=f'{row[1]}').one()
             
             ##################### split cell by space ##########################
-            cit_list = row[22].split()
-            cit_type = row[21].split()
+            cit_list = row[22].split("','")
+            cit_type = row[21].split("','")
 
             index = 0
 
             for citation_date in cit_list:
                 # Loop through list of citation dates contained in CSV cell
+                
                 ### TODO - Consider whether useful to count against date
                 citation_type = cit_type[index]
 
@@ -138,8 +137,6 @@ def load_cit_definitions(processed_file):
     ### TO DO -- find way to scrape thru documentation of citation types
     # Gather into doc for this seeding
 
-    CitationDefinition.query.delete()
-
     for row in processed_file:
         
         ### TODO - Add in logic of how file cells will correlate to fields
@@ -161,17 +158,28 @@ def load_cit_definitions(processed_file):
 
 if __name__ == "__main__":
     connect_to_db(app)
+    ### TO DO - Figure out how the 2 main files will be seeded properly!
 
     ## In case tables haven't been created, create them
     db.create_all()
 
-    ## Import different types of data ##??????
+    ## Delete all rows in table to avoid adding duplicate users
+    Facility.query.delete()
+    Visitation.query.delete()
+    Citation.query.delete()
+    CitationDefinition.query.delete()
 
     ## Call all seeding functions here 
-    processed_file = load_file('excel/fullfile_test.csv')
-    load_facilities(processed_file)
-    load_visitations(processed_file)
-    load_citations(processed_file)
+    processed_file1 = load_file('excel/centerdata.csv')
+    load_facilities(processed_file1)
+    load_visitations(processed_file1)
+    load_citations(processed_file1)
+
+    processed_file2 = load_file('excel/homedata.csv')
+    load_facilities(processed_file2)
+    ### TODO - figure out why process throws error here
+    load_visitations(processed_file2)
+    load_citations(processed_file2)
 
     # definitions_file = load_file('excel/FILENAME')
     # load_cit_definitions(definitions_file)
