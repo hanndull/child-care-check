@@ -20,13 +20,12 @@ class Facility(db.Model):
     facility_zip = db.Column(db.String, nullable=False) #TODO - change to int once data is cleaned
     facility_county = db.Column(db.String, nullable=True)
     facility_capacity = db.Column(db.String, nullable=False) #TODO - change back to int
-    complaint_count = db.Column(db.String,nullable=False) #TO DO - update this field
+    no_complaints = db.Column(db.String,nullable=False) #TO DO - update this field
     facility_status = db.Column(db.String, nullable=False)
 
-
     ### DB Relationships ###
-        # visitations --> Visitation Class
-        # citations --> Citation Class
+        ### visitations --> Visitation Class
+        ### citations --> Citation Class
 
 
     def __repr__ (self):
@@ -37,7 +36,7 @@ class Facility(db.Model):
                     facility_name={self.facility_name} 
                     facility_zip={self.facility_zip}
                     facility_status={self.facility_status} 
-                    complaint_count={self.complaint_count}>
+                    no_complaints={self.no_complaints}>
                     """
 
 
@@ -47,19 +46,14 @@ class Visitation(db.Model):
     __tablename__ = 'visitations'
 
     visitation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # visitation_date = db.Column(db.DateTime(timezone=False), nullable=False) ###Not sure if just "date" works
-    # is_inspection = db.Column(db.Boolean, nullable=False)
-    # facility_id = db.Column(db.Integer, 
-    #                 db.ForeignKey('facilities.facility_id'), nullable=False)
-
-    visitation_date = db.Column(db.String, nullable=True) ###Not sure if just "date" works
+    visitation_date = db.Column(db.String, nullable=False)
     is_inspection = db.Column(db.String, nullable=True)
     facility_id = db.Column(db.Integer, 
                     db.ForeignKey('facilities.facility_id'), nullable=True)
     
     ### DB Relationships ###
     facilities = db.relationship('Facility', backref='visitations')
-    # citations --> Citation Class
+        ### citations --> Citation Class
 
 
     def __repr__(self):
@@ -76,67 +70,47 @@ class Citation(db.Model):
 
     __tablename__ = 'citations'
 
-    # citation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # citation_date = db.Column(db.DateTime(timezone=False), nullable=False)
-    # visitation_id = db.Column(db.Integer, 
-    #                 db.ForeignKey('visitations.visitation_id'), nullable=True)
-    #                 #Keeping nullable for now (for dates that don't match up btwn citation and visitation)
-    #                 #Check into percentage of NULL cells here after seeded & re-evaluate
-    # citation_type = db.Column(db.String(1), nullable=False) 
-    # # citation_code = db.Column(db.String, 
-    # #                 db.ForeignKey('cit_definitions.citation_code'), nullable=False)
-    # cit_def_id = db.Column(db.Integer, 
-    #                 db.ForeignKey('cit_definitions.cit_def_id'), nullable=False)
-    # facility_id = db.Column(db.Integer, 
-    #                 db.ForeignKey('facilities.facility_id'), nullable=False)
-
-    # ### DB Relationships ###
-    # visitations = db.relationship('Visitation', backref='citations')
-    # cit_definitions = db.relationship('CitationDefinition', backref='citations')
-    # facilities = db.relationship('Facility', backref='citations')
-
     citation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     citation_date = db.Column(db.String, nullable=False)
     #citation_type = db.Column(db.String, nullable=False)     
     visitation_id = db.Column(db.Integer, 
                     db.ForeignKey('visitations.visitation_id'), nullable=True)
-    #cit_def_id = db.Column(db.Integer, 
-                    #db.ForeignKey('cit_definitions.cit_def_id'), nullable=True)
+    cit_def_id = db.Column(db.Integer, 
+                    db.ForeignKey('cit_definitions.cit_def_id'), nullable=True)
+        ### Retaining cit_def_id as FKey, although most will be null--
+        ### Only linking a few clean citations for purposes of demo
     facility_id = db.Column(db.Integer, 
                     db.ForeignKey('facilities.facility_id'), nullable=True)
 
     ### DB Relationships ###
     visitations = db.relationship('Visitation', backref='citations')
-    #cit_definitions = db.relationship('CitationDefinition', backref='citations')
+    cit_definitions = db.relationship('CitationDefinition', backref='citations')
     facilities = db.relationship('Facility', backref='citations')
+
 
     def __repr__(self):
         """Info about citation"""
 
         return f"""<citation_id={self.citation_id} 
+                    citation_code={self.citation_code}
                     citation_date={self.citation_date}>
                     """ 
-                    #citation_code={self.citation_code}
                     #citation_type={self.citation_type}
 
-##********* THINKING OF DELETING BELOW TABLE *************
+
 class CitationDefinition(db.Model):
     """Class model for facility licensing violations"""
 
     __tablename__ = 'cit_definitions'
-
-    # cit_def_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    # citation_code = db.Column(db.String, nullable=False)
-    # citation_description = db.Column(db.String, nullable=False)
-    # citation_url = db.Column(db.String, nullable=False)
 
     cit_def_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     citation_code = db.Column(db.String, nullable=True)
     citation_description = db.Column(db.String, nullable=True)
     citation_url = db.Column(db.String, nullable=True)
 
-    # DB Relationships ###
-        # citations --> Citation Class
+    ### DB Relationships ###
+        ### citations --> Citation Class
+
 
     def __repr__(self):
         """Info about citation definition"""

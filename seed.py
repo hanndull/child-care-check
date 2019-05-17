@@ -8,7 +8,6 @@ from model import db, Facility, Visitation, Citation, CitationDefinition, connec
 from server import app
 from datetime import datetime 
 import csv
-from random import choice 
 
 ##### Load Data to DB ########################################################
 
@@ -42,6 +41,11 @@ def load_facilities(processed_file):
             if char != "'":
                 name += char
 
+        if row[30] == "No Complaints":
+            no_complaints = True
+        else: 
+            no_complaints = False
+
         facility = Facility(
                     facility_type = row[0],
                     facility_number = row[1], 
@@ -52,7 +56,7 @@ def load_facilities(processed_file):
                     facility_zip = row[9], 
                     facility_county = row[10], 
                     facility_capacity = row[12],
-                    complaint_count = row[30], 
+                    no_complaints = no_complaints, 
                     facility_status = row[13],
                     )
 
@@ -77,14 +81,20 @@ def load_visitations(processed_file):
 
             for visit_date in visit_list:
                 # Loop through list of visit dates contained in same CSV cell
+
                 if visit_date in inspection_list:
                     inspection=True
                 else:
                     inspection=False
+                    ### NOTE: This is FAULTY!! Due to difference in date format
+                    ### Dates that are the same do not technically match
                 
                 visit_date = visit_date.strip()
 
                 ### TODO - insert datetime logic here
+                ### NOTE - datetime conversion is messy due to 
+                    ### 1. various input date formats
+                    ### 2. multiple dates per row --> cannot convert w/in CSV 
 
                 visitation = Visitation(
                     visitation_date = visit_date,
@@ -101,14 +111,12 @@ def load_visitations(processed_file):
 
 def load_citations(processed_file):
     """Load citations from file"""
-    ### NOTE: load_cit_definitions must be run prior to this function
 
     for row in processed_file:
         
         if row[21] != '':
 
             facility = Facility.query.filter_by(facility_number=f'{row[1]}').one()
-            citation_definitions = CitationDefinition.query.all() ### TODO - Make sure this functions 
             
             ##################### split cell by space ##########################
             cit_list = row[22].split("','")
@@ -116,24 +124,19 @@ def load_citations(processed_file):
             for citation_date in cit_list:
                 ## Loop through list of citation dates contained in CSV cell
                 
-                #citation_type = choice(citation_definitions)
-                ## Choose random choice for a citation type 
-                ## (real CSV data too messy for MVP timeframe)
-                
                 citation_date = citation_date.strip()
 
                 ### TODO - insert datetime logic here
+                ### NOTE - datetime conversion is messy due to 
+                    ### 1. various input date formats
+                    ### 2. multiple dates per row --> cannot convert w/in CSV 
 
                 citation = Citation(
                         citation_date = citation_date,
-                        #citation_type = citation_type.citation_code,
                         facility_id = facility.facility_id,
                     )
 
                 db.session.add(citation)
-                
-                # if index < (len(cit_type)-1):
-                #     index += 1
 
     db.session.commit()
 
@@ -142,13 +145,8 @@ def load_citations(processed_file):
 
 def load_cit_definitions(processed_file):
     """Load citation definitions from file"""
-    
-    ### TO DO -- find way to scrape thru documentation of citation types
-    # Gather into doc for this seeding
 
     for row in processed_file:
-        
-        ### TODO - Add in logic of how file cells will correlate to fields
 
         cit_def = CitationDefinition(
             citation_code=citation_code,
@@ -185,11 +183,5 @@ if __name__ == "__main__":
     processed_file1 = load_file('excel/centerdata.csv')
     load_facilities(processed_file1)
     load_visitations(processed_file1)
-    load_citations(processed_file1)
-
-    # processed_file2 = load_file('excel/homedata.csv')
-    # load_facilities(processed_file2)
-    # ### TODO - figure out why process throws error here
-    # load_visitations(processed_file2)
-    # load_citations(processed_file2)
+    # load_citations(processed_file1)
 
