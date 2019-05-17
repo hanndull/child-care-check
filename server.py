@@ -36,6 +36,7 @@ def show_facilities():
 
     return render_template('facilities.html', facilities=facilities)
 
+
 @app.route('/facilities/<facility_id>')
 def show_facility_details(facility_id):
     """Facility details info page"""

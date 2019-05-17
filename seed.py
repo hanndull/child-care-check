@@ -41,6 +41,11 @@ def load_facilities(processed_file):
             if char != "'":
                 name += char
 
+        address = ""
+        for char in row[6]:
+            if char != "'":
+                address += char
+
         if row[30] == "No Complaints":
             no_complaints = True
         else: 
@@ -51,9 +56,10 @@ def load_facilities(processed_file):
                     facility_number = row[1], 
                     facility_name = name,
                     facility_phone = row[5],
-                    facility_address = row[6], 
+                    facility_address = address, 
+                    facility_city = row[7],
                     facility_state = row[8], 
-                    facility_zip = row[9], 
+                    facility_zip = row[9][:6], 
                     facility_county = row[10], 
                     facility_capacity = row[12],
                     no_complaints = no_complaints, 

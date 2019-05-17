@@ -15,7 +15,8 @@ class Facility(db.Model):
     facility_number = db.Column(db.String, nullable=False)
     facility_name = db.Column(db.String, nullable=False)
     facility_phone = db.Column(db.String, nullable=True) # TODO - check on phone num as str
-    facility_address = db.Column(db.String, nullable=True) # TODO - check on address as nullable
+    facility_address = db.Column(db.String, nullable=False) 
+    facility_city = db.Column(db.String, nullable=False)
     facility_state = db.Column(db.String, nullable=False)
     facility_zip = db.Column(db.String, nullable=False) #TODO - change to int once data is cleaned
     facility_county = db.Column(db.String, nullable=True)
