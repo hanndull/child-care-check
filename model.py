@@ -97,29 +97,29 @@ class Citation(db.Model):
 
     citation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     citation_date = db.Column(db.String, nullable=False)
-    citation_type = db.Column(db.String, nullable=False)     
+    #citation_type = db.Column(db.String, nullable=False)     
     visitation_id = db.Column(db.Integer, 
                     db.ForeignKey('visitations.visitation_id'), nullable=True)
-    cit_def_id = db.Column(db.Integer, 
-                    db.ForeignKey('cit_definitions.cit_def_id'), nullable=True)
+    #cit_def_id = db.Column(db.Integer, 
+                    #db.ForeignKey('cit_definitions.cit_def_id'), nullable=True)
     facility_id = db.Column(db.Integer, 
                     db.ForeignKey('facilities.facility_id'), nullable=True)
 
     ### DB Relationships ###
     visitations = db.relationship('Visitation', backref='citations')
-    cit_definitions = db.relationship('CitationDefinition', backref='citations')
+    #cit_definitions = db.relationship('CitationDefinition', backref='citations')
     facilities = db.relationship('Facility', backref='citations')
 
     def __repr__(self):
         """Info about citation"""
 
         return f"""<citation_id={self.citation_id} 
-                    citation_date={self.citation_date}
-                    citation_type={self.citation_type} 
-                    citation_code={self.citation_code}>
-                    """
+                    citation_date={self.citation_date}>
+                    """ 
+                    #citation_code={self.citation_code}
+                    #citation_type={self.citation_type}
 
-
+##********* THINKING OF DELETING BELOW TABLE *************
 class CitationDefinition(db.Model):
     """Class model for facility licensing violations"""
 
@@ -154,7 +154,7 @@ def connect_to_db(app):
     """Connect the database to our Flask app."""
 
     # Configure to use PostgreSQL database.
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///violations' ##TO DO - update 
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///test1' ##TO DO - update 
     app.config['SQLALCHEMY_ECHO'] = False
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app

@@ -8,6 +8,7 @@ from model import db, Facility, Visitation, Citation, CitationDefinition, connec
 from server import app
 from datetime import datetime 
 import csv
+from random import choice 
 
 ##### Load Data to DB ########################################################
 
@@ -81,6 +82,10 @@ def load_visitations(processed_file):
                 else:
                     inspection=False
                 
+                visit_date = visit_date.strip()
+
+                ### TODO - insert datetime logic here
+
                 visitation = Visitation(
                     visitation_date = visit_date,
                     is_inspection = inspection,
@@ -96,35 +101,39 @@ def load_visitations(processed_file):
 
 def load_citations(processed_file):
     """Load citations from file"""
+    ### NOTE: load_cit_definitions must be run prior to this function
 
     for row in processed_file:
         
         if row[21] != '':
 
             facility = Facility.query.filter_by(facility_number=f'{row[1]}').one()
+            citation_definitions = CitationDefinition.query.all() ### TODO - Make sure this functions 
             
             ##################### split cell by space ##########################
             cit_list = row[22].split("','")
-            cit_type = row[21].split("','")
-
-            index = 0
-
+        
             for citation_date in cit_list:
-                # Loop through list of citation dates contained in CSV cell
+                ## Loop through list of citation dates contained in CSV cell
                 
-                ### TODO - Consider whether useful to count against date
-                citation_type = cit_type[index]
+                #citation_type = choice(citation_definitions)
+                ## Choose random choice for a citation type 
+                ## (real CSV data too messy for MVP timeframe)
+                
+                citation_date = citation_date.strip()
+
+                ### TODO - insert datetime logic here
 
                 citation = Citation(
                         citation_date = citation_date,
-                        citation_type = citation_type,
+                        #citation_type = citation_type.citation_code,
                         facility_id = facility.facility_id,
                     )
 
                 db.session.add(citation)
                 
-                if index < (len(cit_type)-1):
-                    index += 1
+                # if index < (len(cit_type)-1):
+                #     index += 1
 
     db.session.commit()
 
@@ -142,7 +151,6 @@ def load_cit_definitions(processed_file):
         ### TODO - Add in logic of how file cells will correlate to fields
 
         cit_def = CitationDefinition(
-            cit_def_id=cit_def_id,
             citation_code=citation_code,
             citation_description=citation_description,
             citation_url=citation_url,
@@ -170,16 +178,18 @@ if __name__ == "__main__":
     CitationDefinition.query.delete()
 
     ## Call all seeding functions here 
+
+    # definitions_file = load_file('excel/FILENAME')
+    # load_cit_definitions(definitions_file)
+
     processed_file1 = load_file('excel/centerdata.csv')
     load_facilities(processed_file1)
     load_visitations(processed_file1)
     load_citations(processed_file1)
 
-    processed_file2 = load_file('excel/homedata.csv')
-    load_facilities(processed_file2)
-    ### TODO - figure out why process throws error here
-    load_visitations(processed_file2)
-    load_citations(processed_file2)
+    # processed_file2 = load_file('excel/homedata.csv')
+    # load_facilities(processed_file2)
+    # ### TODO - figure out why process throws error here
+    # load_visitations(processed_file2)
+    # load_citations(processed_file2)
 
-    # definitions_file = load_file('excel/FILENAME')
-    # load_cit_definitions(definitions_file)
