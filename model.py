@@ -72,7 +72,7 @@ class Citation(db.Model):
 
     citation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     citation_date = db.Column(db.String, nullable=False)
-    #citation_type = db.Column(db.String, nullable=False)     
+    citation_code = db.Column(db.String, nullable=True)     
     visitation_id = db.Column(db.Integer, 
                     db.ForeignKey('visitations.visitation_id'), nullable=True)
     cit_def_id = db.Column(db.Integer, 
@@ -95,7 +95,6 @@ class Citation(db.Model):
                     citation_code={self.citation_code}
                     citation_date={self.citation_date}>
                     """ 
-                    #citation_type={self.citation_type}
 
 
 class CitationDefinition(db.Model):

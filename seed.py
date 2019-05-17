@@ -120,11 +120,24 @@ def load_citations(processed_file):
             
             ##################### split cell by space ##########################
             cit_list = row[22].split("','")
+            code_list = row[21].split("','")
         
+            index = 0
             for citation_date in cit_list:
                 ## Loop through list of citation dates contained in CSV cell
-                
                 citation_date = citation_date.strip()
+
+                if len(cit_list) == len(code_list):
+                    citation_code = code_list[index].strip()
+                else:
+                    citation_code = None
+
+                visit = Visitation.query.filter_by(facility_id = facility.facility_id, visitation_date=citation_date).first()
+                
+                if visit:
+                    visitation_id = visit.visitation_id
+                else:
+                    visitation_id = None
 
                 ### TODO - insert datetime logic here
                 ### NOTE - datetime conversion is messy due to 
@@ -133,10 +146,15 @@ def load_citations(processed_file):
 
                 citation = Citation(
                         citation_date = citation_date,
+                        citation_code = citation_code,
                         facility_id = facility.facility_id,
+                        visitation_id = visitation_id,
                     )
 
                 db.session.add(citation)
+
+                if index < (len(cit_list) -1):
+                    index += 1
 
     db.session.commit()
 
@@ -183,5 +201,5 @@ if __name__ == "__main__":
     processed_file1 = load_file('excel/centerdata.csv')
     load_facilities(processed_file1)
     load_visitations(processed_file1)
-    # load_citations(processed_file1)
+    load_citations(processed_file1)
 

@@ -24,7 +24,26 @@ app.jinja_env.undefined = StrictUndefined
 @app.route('/')
 def show_home():
     """Homepage"""
-    pass
+
+    return render_template('home.html')
+
+
+@app.route('/facilities')
+def show_facilities():
+    """Facilities page"""
+
+    facilities = Facility.query.all()
+
+    return render_template('facilities.html', facilities=facilities)
+
+@app.route('/facilities/<facility_id>')
+def show_facility_details(facility_id):
+    """Facility details info page"""
+
+    facility = Facility.query.filter_by(facility_id=facility_id).one()
+
+    return render_template('/facility_profile.html', facility=facility)
+
 
 
 ##### Dunder Main ############################################################
