@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>CA Child Care Center Facilities</h3>
+
+<h2>{{ facility.facility_name }}</h2>
+
+
+<h3>Visitations and Inspections</h3>
+        <ul>
+        {% for visit in facility.visitations %}
+            <li>Visit Date: {{ visit.visitation_date }}; Inspection? {{ visit.is_inspection }}</li>
+        {% endfor %}
+        </ul>
+
+
+<h3>Complaints:</h3>    
+    {% if facility.no_complaints %}
+        <p>This facility has received no complaints.</p>
+    {% else %}
+        <p>This facility has a history of complaints.</p>
+    {% endif %}
+
+<h3>Citations:</h3>
+    {% if facility.citations %}
+        <ul>
+        {% for citation in facility.citations %}
+            <li>{{ citation.citation_code }}, {{ citation.citation_date }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+
+
+<h3><a href="/facilities">Back to All Facilities</a></h3>
+
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>CA Child Care Center Facilities</h1>
+
+<h2>Note that this list does not include home-based facilities.</h2>
+    
+    {% for facility in facilities %}
+        <p><a href="/facilities/{{ facility.facility_id }}">
+            {{ facility.facility_name }}
+        </a></p>
+    
+    {% endfor %}
+
+{% endblock %}
