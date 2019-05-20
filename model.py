@@ -18,7 +18,7 @@ class Facility(db.Model):
     facility_address = db.Column(db.String, nullable=False) 
     facility_city = db.Column(db.String, nullable=False)
     facility_state = db.Column(db.String, nullable=False)
-    facility_zip = db.Column(db.String, nullable=False) #TODO - change to int once data is cleaned
+    facility_zip = db.Column(db.Integer, nullable=False) #TODO - change to int once data is cleaned
     facility_county = db.Column(db.String, nullable=True)
     facility_capacity = db.Column(db.String, nullable=False) #TODO - change back to int
     no_complaints = db.Column(db.String,nullable=False) #TO DO - update this field
@@ -47,7 +47,7 @@ class Visitation(db.Model):
     __tablename__ = 'visitations'
 
     visitation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    visitation_date = db.Column(db.String, nullable=False)
+    visitation_date = db.Column(db.DateTime, nullable=False)
     is_inspection = db.Column(db.String, nullable=True)
     facility_id = db.Column(db.Integer, 
                     db.ForeignKey('facilities.facility_id'), nullable=True)
@@ -72,7 +72,7 @@ class Citation(db.Model):
     __tablename__ = 'citations'
 
     citation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    citation_date = db.Column(db.String, nullable=False)
+    citation_date = db.Column(db.DateTime, nullable=False)
     citation_code = db.Column(db.String, nullable=True)     
     visitation_id = db.Column(db.Integer, 
                     db.ForeignKey('visitations.visitation_id'), nullable=True)

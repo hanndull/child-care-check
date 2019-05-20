@@ -46,6 +46,32 @@ def show_facility_details(facility_id):
     return render_template('/facility_profile.html', facility=facility)
 
 
+@app.route('/map')
+def show_map():
+    """Return page with facilities plotted to map"""
+
+    facilities = Facility.query.all()
+
+    return render_template('map.html', facilities=facilities)
+
+
+# @app.route('/geocode-request')
+# def send_geocode_request():
+
+#     facilities = Facility.query.all()
+
+#     for facility in facilities:
+#         # Loop thru facilities, create geocode request url for each
+
+#         ### TODO - this is currently not saving to anything--
+#         ### Need to figure out if Google Geocode req is viable for this project
+#         (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility_city}+{facility_state}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
+
+#     return 
+
+#@app.route('/map/<facility_id>')
+
+
 
 ##### Dunder Main ############################################################
 

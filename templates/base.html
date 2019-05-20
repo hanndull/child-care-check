@@ -3,14 +3,30 @@
 
 <head>
   <title>CA Child Care Centers: Licensing Info</title>
+  {% block head %}
+    Enter any HTML head content
+  {% endblock %}
 </head>
+
+<body>
+
+<div class=flash-box>
+    <!--  Flash messages display here -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+</div>
 
 <h3><a href="/">CA Child Care Centers: Licensing Info</a></h3>
 <hr>
 
-<body>
-
-  {% block content %} fill in content here {% endblock %}
+{% block content %} fill in content here {% endblock %}
 
 </body>
 

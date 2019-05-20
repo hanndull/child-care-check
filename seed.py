@@ -6,8 +6,9 @@
 from sqlalchemy import func, create_engine
 from model import db, Facility, Visitation, Citation, CitationDefinition, connect_to_db
 from server import app
-from datetime import datetime 
+from datetime import *
 import csv
+from dateutil.parser import *
 
 ##### Load Data to DB ########################################################
 
@@ -59,7 +60,7 @@ def load_facilities(processed_file):
                     facility_address = address, 
                     facility_city = row[7],
                     facility_state = row[8], 
-                    facility_zip = row[9][:6], 
+                    facility_zip = int(row[9][:6]), 
                     facility_county = row[10], 
                     facility_capacity = row[12],
                     no_complaints = no_complaints, 
@@ -78,37 +79,45 @@ def load_visitations(processed_file):
 
     for row in processed_file:
         if row[23] != '':
-            
-            facility = Facility.query.filter_by(facility_number=f'{row[1]}').one()
 
-            ##################### split cell by space ##########################
+            ##################### split cell by comma ##########################
             visit_list = row[23].split("','")
             inspection_list = row[24].split("','")
 
+            for inspect_date in inspection_list:
+                # Loop through list of inspection dates contained in same CSV cell
+
+                inspect_date = inspect_date.strip()
+
+                if "/" in inspect_date:
+                    parse(inspect_date, dayfirst=False)
+                else:
+                    inspection_list.remove(inspect_date)        
+
             for visit_date in visit_list:
                 # Loop through list of visit dates contained in same CSV cell
-
-                if visit_date in inspection_list:
-                    inspection=True
-                else:
-                    inspection=False
-                    ### NOTE: This is FAULTY!! Due to difference in date format
-                    ### Dates that are the same do not technically match
                 
                 visit_date = visit_date.strip()
 
-                ### TODO - insert datetime logic here
-                ### NOTE - datetime conversion is messy due to 
-                    ### 1. various input date formats
-                    ### 2. multiple dates per row --> cannot convert w/in CSV 
+                if "/" not in visit_date:
+                    visit_list.remove(visit_date)
+                elif "/" in visit_date:
+                    parse(visit_date, dayfirst=False)
+                
+                    if visit_date in inspection_list:
+                        inspection=True
+                    else:
+                        inspection=False
+                    
+                    facility = Facility.query.filter_by(facility_number=f'{row[1]}').one()
 
-                visitation = Visitation(
-                    visitation_date = visit_date,
-                    is_inspection = inspection,
-                    facility_id = facility.facility_id,
-                    )
+                    visitation = Visitation(
+                        visitation_date = visit_date,
+                        is_inspection = inspection,
+                        facility_id = facility.facility_id,
+                        )
 
-                db.session.add(visitation)
+                    db.session.add(visitation)
 
     db.session.commit()
 
@@ -131,7 +140,9 @@ def load_citations(processed_file):
             index = 0
             for citation_date in cit_list:
                 ## Loop through list of citation dates contained in CSV cell
-                citation_date = citation_date.strip()
+                
+                #citation_date = citation_date.strip()
+                citation_date = parse(citation_date.strip(), dayfirst=False)
 
                 if len(cit_list) == len(code_list):
                     citation_code = code_list[index].strip()
@@ -144,11 +155,6 @@ def load_citations(processed_file):
                     visitation_id = visit.visitation_id
                 else:
                     visitation_id = None
-
-                ### TODO - insert datetime logic here
-                ### NOTE - datetime conversion is messy due to 
-                    ### 1. various input date formats
-                    ### 2. multiple dates per row --> cannot convert w/in CSV 
 
                 citation = Citation(
                         citation_date = citation_date,
