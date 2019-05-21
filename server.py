@@ -8,6 +8,7 @@ from jinja2 import StrictUndefined
 from flask import Flask, render_template, redirect, request, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, Facility, Visitation, Citation, CitationDefinition
+from sqlalchemy import func
 
 ##### Create App #############################################################
 
@@ -26,6 +27,54 @@ def show_home():
     """Homepage"""
 
     return render_template('home.html')
+
+
+@app.route('/filter')
+def display_filter_form():
+    """Display filter fields of form"""
+
+    return render_template('filter.html')
+
+@app.route('/filter-results', methods=['POST'])
+def process_form():
+    """Recieve and store filtration input"""
+
+    name = request.form.get('name').upper()
+    zipcode = request.form.get('zipcode')
+    min_cit = request.form.get('min_cit')
+    max_cit = request.form.get('max_cit')
+
+
+    if name or zipcode or min_cit or max_cit:
+        if name:
+            facilities = Facility.query.filter(Facility.facility_name.like(f'%{name}%')).all()
+        elif zipcode:
+            facilities = Facility.query.filter(Facility.facility_zip == int(zipcode)).all()
+        elif min_cit:
+            q = Citation.query
+            facilities = q.group_by('facility_id').having(db.func.count(Citation.citation_id) >= int(min_cit)).all()
+        elif max_cit:
+            q = Citation.query
+            facilities = q.group_by('facility_id').having(db.func.count(Citation.citation_id) <= int(max_cit)).all()
+
+        flash('Applying your requested filters now!')
+
+        return render_template('filter-results.html', facilities=facilities) 
+        ### TODO - figure out why it is not rendering test.html
+        ### TODO - figure out how to diplay map w/ filtered points
+    
+    else:
+        flash('No filters were applied.')
+
+        return redirect('/') 
+
+
+
+@app.route('/filter_by_zip')
+def filter_zip():
+    """Filter by facility zip code"""
+
+    pass
 
 
 @app.route('/facilities')
@@ -55,19 +104,19 @@ def show_map():
     return render_template('map.html', facilities=facilities)
 
 
-# @app.route('/geocode-request')
-# def send_geocode_request():
+@app.route('/geocode-request')
+def send_geocode_request():
 
-#     facilities = Facility.query.all()
+    facilities = Facility.query.all()
 
-#     for facility in facilities:
-#         # Loop thru facilities, create geocode request url for each
+    # for facility in facilities:
+        # Loop thru facilities, create geocode request url for each
 
-#         ### TODO - this is currently not saving to anything--
-#         ### Need to figure out if Google Geocode req is viable for this project
-#         (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility_city}+{facility_state}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
+        ### TODO - this is currently not saving to anything--
+        ### Need to figure out if Google Geocode req is viable for this project
+        # (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility_city}+{facility_state}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
 
-#     return 
+    return 
 
 #@app.route('/map/<facility_id>')
 
