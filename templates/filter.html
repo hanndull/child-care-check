@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Filter your results.</h2>
+
+<form action='/filter-results' method='POST'>
+        <input type='text' name='name' placeholder='Center Name'><br>
+        <input type='text' name='zipcode' placeholder='Zipcode'><br>
+        <input type='text' name='min_cit' placeholder='Minimum Citation Count'><br>
+        <input type='text' name='max_cit' placeholder='Maximum Citation Count'><br>
+        <input type='text' name='status' placeholder="status"><br> <!-- TODO - change to drop down/radio--look up select -->
+        <input type='date' name='date'><br>
+        <input type='submit' value='Filter!'>
+        <!-- TODO - Add Status filter field -->
+        <!-- TODO - Add date-range filter -->
+</form>
+
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block head %}
+  <meta name="viewport" content="initial-scale=1.0">
+  <meta charset="utf-8">
+  <style>
+    /* Always set the map height explicitly to define the size of the div
+     * element that contains the map. */
+    #map {
+      height: 100%;
+    }
+    /* Optional: Makes the sample page fill the window. */
+    html, body {
+      height: 85%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+{% endblock %}
+
+  
+{% block content %}
+
+
+  <div id="map"></div>
+  
+  <script>
+
+    // const icon = {
+    //   url: 'https://svgsilh.com/svg_v2/152964.svg',
+    //   scaledSize: new google.maps.Size(30, 30)
+    // };
+
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 37.8, lng: -120},
+        zoom: 5
+      });
+
+      const icon = {
+        url: 'https://svgsilh.com/svg_v2/152964.svg',
+        scaledSize: new google.maps.Size(30, 30)
+      };
+      
+      const testMarker = new google.maps.Marker({
+        position: {lat: 35.2417118, lng: -120.6776186},
+        map: map, 
+        title: "Children's Montessori SLO", 
+        icon: icon,
+      });
+
+ // This area currently not functioning - START
+      const infowindow = new google.maps.InfoWindow({
+        content: 'Test Window'
+      })
+
+      marker.addListener('click', function() {
+        infowindow.open(map, marker);
+      });
+ // This area currently not functioning - END
+
+    };
+
+    function addMarker(icon, position, title, map) {
+      const marker = new google.maps.Marker({ position, map, title, icon });
+      return marker;
+    };
+
+// This area currently not functioning - START
+    for (const facility of facilities) {
+      addMarker(icon, facility.facility_address, facility.facility_name, map);
+    }; 
+    // ### TODO - Need to add in lat+long rather than address
+// This area currently not functioning - END
+
+  </script>
+
+  <script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U&callback=initMap">
+  </script>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+  
+<div>
+{% for facility in facilities %}
+    <p>
+        <a href="/facilities/{{ facility.facility_id }}">
+        {{ facility.facility_name }}</a>
+    </p>
+{% endfor %}
+</div>
+
+{% endblock %}
