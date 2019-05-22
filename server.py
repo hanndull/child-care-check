@@ -44,15 +44,21 @@ def process_form():
     min_cit = request.form.get('min_cit')
     max_cit = request.form.get('max_cit')
     status = request.form.get('status').upper()
+    date = request.form.get('date')
     ### TODO - Add status filter
     ### TODO - Add date-range filter
 
+    print(">>>>>>>>>>>>>>>>>>>>>>>>", date)
+    ### TODO - Turn into datetime obj
 
     if name or zipcode or min_cit or max_cit or status:
+
+        fquery = Facility.query
+
         if name:
-            facilities = Facility.query.filter(Facility.facility_name.like(f'%{name}%')).all()
-        elif zipcode:
-            facilities = Facility.query.filter(Facility.facility_zip == int(zipcode)).all()
+            fquery = fquery.filter(Facility.facility_name.like(f'%{name}%'))
+        if zipcode:
+            fquery = fquery.filter(Facility.facility_zip == int(zipcode))
 
         #####################################################################################
         ### Below queries need to be like:
@@ -64,41 +70,36 @@ def process_form():
 
 
         ### SELECT COUNT(citation_id), facility_id FROM citations GROUP BY facility_id;
-        elif min_cit:
-            
-            cit_by_facility = Citation.query.group_by('facility_id')
+        if min_cit:
 
-            cit_by_facility.query.options(db.joinedload('facilities.facility_id')).having(db.func.count(Citation.))
+            fquery = (fquery
+                .outerjoin(Facility.citations)
+                .group_by(Facility)
+                .having(func.count_(Facility.citations) >= min_cit))
 
-            #c = Citation.query.group_by('facility_id').having(db.func.count(Citation.citation_id) > int(min_cit))
-            
-            citations_facilities = Citation.query.options(db.joinedload('facilities')).all()
-            print (citations_facilities)
-            # facilities = []
+        if max_cit:
+            fquery = (fquery
+                .outerjoin(Facility.citations)
+                .group_by(Facility)
+                .having(func.count_(Facility.citations) <= max_cit))
 
-            # Facility.query.filter(Facility.citations != False).all()
-            facilities = Facility.query.all()
+        if status:
+            fquery = fquery.filter(Facility.facility_status == status)
 
-            #for facility in facilities:
-                #if facility.citations > 2:
-
-
-            
-            ### citations_facilities = a list of citations... Need to get it to be grouped by facility
-            # for facility in citations_facilities:
-            #     if facility.citations.count() > min_cit:
-            #         facilities.append(facility)
+        facilities = fquery.all()
 
 
-            # num_facilities_with_cits = Facility.query.options(db.joinedload('citations')).count()
-            # facilities = facilities_citations.group_by('facility_id').having(db.func.count(Citation.citation_id) >= int(min_cit)).all()
-            # q = Citation.query
-            # facilities = q.group_by('facility_id').having(db.func.count(Citation.citation_id) >= int(min_cit)).all()
-        elif max_cit:
-            q = Citation.query
-            facilities = q.group_by('facility_id').having(db.func.count(Citation.citation_id) <= int(max_cit)).all()
-        elif status:
-            facilities = Facility.query.filter(Facility.facility_status == status).all()
+#######################
+
+            # facilities = (Facility.query
+            #     .(querystring)
+            #     # .outerjoin(Facility.citations)
+            #     # .group_by(Facility)
+            #     # .having(func.count_(Facility.citations) >= min_cit)
+            #     .all())
+
+#######################
+
 
         flash('Applying your requested filters now!')
 
