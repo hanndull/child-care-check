@@ -8,7 +8,7 @@ from jinja2 import StrictUndefined
 from flask import Flask, render_template, redirect, request, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, Facility, Visitation, Citation, CitationDefinition
-from sqlalchemy import func
+from sqlalchemy import func, distinct
 from dateutil.parser import *
 
 ##### Create App #############################################################
@@ -45,11 +45,9 @@ def process_form():
     min_cit = request.form.get('min_cit')
     max_cit = request.form.get('max_cit')
     status = request.form.get('status').upper()
-    max_date = request.form.get('min_date') ### more recent
-    min_date = request.form.get('max_date') ### less recent
-       ### TODO - add filter logic
+    suppress_date = request.form.get('suppress_date')
 
-    if name or zipcode or min_cit or max_cit or status or min_date:
+    if name or zipcode or min_cit or max_cit or status or suppress_date:
 
         fquery = Facility.query ### Base query
 
@@ -74,67 +72,28 @@ def process_form():
                 .having(func.count_(Facility.citations) <= max_cit))
 
         if status:
+            if status == 'PROBATION':
+                status = 'ON PROBATION'
             fquery = fquery.filter(Facility.facility_status == status)
 
-        if min_date:
-            # SELECT * FROM citations WHERE citation_date BETWEEN '2017-01-01' AND '2019-05-01';
-            # can replace right date w/ "current_date" or left date with "where time > XXXdateXXX()"
-            # https://popsql.com/learn-sql/postgresql/how-to-query-date-and-time-in-postgresql/
+        if suppress_date:
+            ### Show only facilities who have had 0 citations since input date
+            suppress_date = isoparse(suppress_date)
 
-
-            ### THIS WORKED
-            ### SELECT facilities.facility_name, citations.citation_date
-            ### FROM facilities
-            ### LEFT JOIN citations
-            ### ON facilities.facility_id = citations.facility_id
-            ### GROUP BY (citations.citation_date, facilities.facility_id)
-            ### ORDER BY facilities.facility_id;
-
-            ### MOST RECENT CITATION, Based on citations table=
-            # test1=# SELECT facilities.facility_name, facilities.facility_id, MAX(citations.citation_date)
-            # test1-# FROM citations
-            # test1-# LEFT JOIN facilities
-            # test1-# ON facilities.facility_id = citations.facility_id
-            # test1-# GROUP BY (facilities.facility_id)
-            # test1-# ORDER BY facilities.facility_id;
-
-            ### MOST RECENT CITATION, based on facilities table
-            # test1=# SELECT facilities.facility_name, facilities.facility_id, MAX(citations.citation_date)
-            # test1-# FROM facilities 
-            # test1-# LEFT JOIN citations
-            # test1-# ON facilities.facility_id = citations.facility_id
-            # test1-# GROUP BY facilities.facility_id
-            # test1-# ORDER BY facilities.facility_id;
-
-            ### MOST RECENT CITATION W/ FILTER DATE
-            # SELECT DISTINCT ON (facilities.facility_id) facilities.facility_id, MAX(citations.citation_date)
-            # FROM facilities 
-            # LEFT JOIN citations
-            # ON facilities.facility_id = citations.facility_id
-            # GROUP BY facilities.facility_id, citations.citation_date HAVING citations.citation_date > '2018-01-01'
-            # ORDER BY facilities.facility_id;
-            isoparse(min_date)
-            
-            ### TODO - Fix this query
             fquery = (fquery
-                .outerjoin(Facility.citations)
-                .group_by(Facility.facility_id, Facility.citations)
-                .having(func.and_(Facility.citations <= min_date))
-                )
-            #10503
-            
-            #current_date = datetime.datetime.utcnow()
-            #date_results = Citation.query.filter(Citation.citation_date <= min_date)
-            # fquery = (fquery
-            #     .outerjoin(Facility.citations)
-            #     .group_by(Facility)
-            #     .having(Facility.citations.citation_date <= isoparse(min_date)))
+                .join(Citation)
+                .group_by(Facility.facility_id)
+                .having(func.max(Citation.citation_date) <= suppress_date))
 
         facilities = fquery.all() ### Conglomerate all applicable queries
 
+        facility_count = len(facilities)
+
         flash('Applying your requested filters now...')
 
-        return render_template('filter-results.html', facilities=facilities) 
+        return render_template('filter-results.html', 
+                                facilities=facilities, 
+                                facility_count=facility_count) 
         ### TODO - figure out how to diplay map w/ filtered points
     
     else:

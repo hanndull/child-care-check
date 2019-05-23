@@ -5,10 +5,14 @@
 
 <form action='/filter-results' method='POST'>
         <input type='text' name='name' placeholder='Center Name'><br>
+        
         <input type='text' name='zipcode' placeholder='Zipcode'><br>
+        
         <input type='text' name='min_cit' placeholder='Minimum Citation Count'><br>
+        
         <input type='text' name='max_cit' placeholder='Maximum Citation Count'><br>
         <!-- <input type='text' name='status' placeholder="status"><br>  --><!-- TODO - change to drop down/radio--look up select -->
+        
         <label for="status-select">Facility Status:</label>
                 <select id="status-select" name='status'>
                         <option value="">--Choose an option--</option>
@@ -18,9 +22,10 @@
                         <option value="probation">ON PROBATION</option>
                         <option value="closed">CLOSED</option>
                 </select><br>     
-        <label for="date-select">Select a Date Range:</label><br>
-                From <input id="date-select" type='date' name='min_date' min="2015-01-01"> <!-- less recent -->        
-                To <input id="date-select" type='date' name='max_date' min="2015-01-01"><br> <!-- more recent -->
+        
+        <label for="suppress-recent">Show only facilities who have not have a citation since:</label><br> 
+                <input id="suppress-recent" type='date' name='suppress_date' min="2015-01-01"><br> 
+        
         <input type='submit' value='Filter!'>
         <!-- TODO - Add Status filter field -->
         <!-- TODO - Add date-range filter -->

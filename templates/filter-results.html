@@ -3,6 +3,8 @@
   
 <div>
 {% if facilities %}
+    <h3>Your search returned: {{ facility_count }} facilities</h3>
+    
     {% for facility in facilities %}
         <p>
             <a href="/facilities/{{ facility.facility_id }}">
