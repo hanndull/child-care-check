@@ -10,8 +10,10 @@
 <h3>Visitations and Inspections --</h3>
     {% if facility.visitations %}
         <ul>
-        {% for visit in facility.visitations %}
-            <li><b>Visit Date:</b> {{ visit.visitation_date }}; 
+        {% for visit in facility.visitations|sort(attribute='visitation_date', reverse = True) %}
+        <!-- sorted lists using: https://stackoverflow.com/a/39051279 -->
+
+            <li><b>Visit Date:</b> {{ visit.visitation_date.strftime('%Y-%m-%d') }}; 
                 <b>Was is an inspection?</b> {{ visit.is_inspection }}</li>
         {% endfor %}
         </ul>
@@ -31,8 +33,8 @@
 <h3>Citations --</h3>
     {% if facility.citations %}
         <ul>
-        {% for citation in facility.citations %}
-            <li><b>{{ citation.citation_date }}:</b> 
+        {% for citation in facility.citations|sort(attribute='citation_date', reverse = True) %}
+            <li><b>{{ citation.citation_date.strftime('%Y-%m-%d') }}:</b> 
             {{ citation.citation_code }}</li>
         {% endfor %}
         </ul>

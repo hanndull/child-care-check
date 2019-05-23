@@ -94,19 +94,12 @@ def process_form():
         return render_template('filter-results.html', 
                                 facilities=facilities, 
                                 facility_count=facility_count) 
-        ### TODO - figure out how to diplay map w/ filtered points
+            ### TODO - figure out how to diplay map w/ filtered points
     
     else:
         flash('No filters were applied.')
 
         return redirect('/') 
-
-
-@app.route('/filter_by_zip')
-def filter_zip():
-    """Filter by facility zip code"""
-
-    pass
 
 
 @app.route('/facilities')

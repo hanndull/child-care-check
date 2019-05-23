@@ -4,31 +4,35 @@
 <h2>Filter your results.</h2>
 
 <form action='/filter-results' method='POST'>
-        <input type='text' name='name' placeholder='Center Name'><br>
         
-        <input type='text' name='zipcode' placeholder='Zipcode'><br>
+        <label for='name'>Facility Name </label>
+        <input id='name' type='text' name='name' placeholder='ex: City Kids'><br>
         
-        <input type='text' name='min_cit' placeholder='Minimum Citation Count'><br>
+        <label for='zipcode'>Facility Zip Code </label>
+        <input id='zipcode' type='text' name='zipcode' placeholder='ex: 93636' size=5 pattern="[0-9]*"><br>
+        <!-- Pattern attr from https://css-tricks.com/html-for-zip-codes/ -->
         
-        <input type='text' name='max_cit' placeholder='Maximum Citation Count'><br>
-        <!-- <input type='text' name='status' placeholder="status"><br>  --><!-- TODO - change to drop down/radio--look up select -->
+        <label for='min-cit'>Minimum Citation Count </label>
+        <input id='min-cit' type='number' name='min_cit' placeholder='ex: 2'><br>
         
-        <label for="status-select">Facility Status:</label>
-                <select id="status-select" name='status'>
-                        <option value="">--Choose an option--</option>
-                        <option value="licensed">LICENSED</option>
-                        <option value="pending">PENDING</option>
-                        <option value="inactive">INACTIVE</option>
-                        <option value="probation">ON PROBATION</option>
-                        <option value="closed">CLOSED</option>
-                </select><br>     
+        <label for='max-cit'>Maximum Citation Count </label>
+        <input id='max-cit' type='number' name='max_cit' placeholder='ex: 6'><br>
         
-        <label for="suppress-recent">Show only facilities who have not have a citation since:</label><br> 
-                <input id="suppress-recent" type='date' name='suppress_date' min="2015-01-01"><br> 
+        <label for="status-select">Facility Status </label>
+        <select id="status-select" name='status'>
+                <option value="">--Choose an option--</option>
+                <option value="licensed">LICENSED</option>
+                <option value="pending">PENDING</option>
+                <option value="inactive">INACTIVE</option>
+                <option value="probation">ON PROBATION</option>
+                <option value="closed">CLOSED</option>
+        </select><br>     
+        
+        <label for="suppress-recent">Show only facilities who have not have a citation since </label> 
+        <input id="suppress-recent" type='date' name='suppress_date' min="2013-01-01"><br> 
         
         <input type='submit' value='Filter!'>
-        <!-- TODO - Add Status filter field -->
-        <!-- TODO - Add date-range filter -->
+
 </form>
 
 {% endblock %}
