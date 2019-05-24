@@ -127,7 +127,7 @@ def show_facility_details(f_id):
 def show_map():
     """Return page with facilities plotted to map"""
 
-    facilities = Facility.query.all()
+    facilities = Facility.query.filter(Facility.longitude != None).all()
 
     return render_template('map.html', facilities=facilities)
 
@@ -138,37 +138,47 @@ def send_geocode_request():
     Also adds latitude, longitude, and Google Place ID to db.
     """
 
-    facilities = Facility.query.all()
-    # completed = []
+    #facilities = Facility.query.filter(Facility.f_id > 55, Facility.f_id < 101).all()
+    completed = []
 
-    # for facility in facilities:
-    # # Loop thru facilities, create geocode request url for each
-    #     geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility.city}+{facility.state}+{facility.f_zip}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
-    #     results = requests.get(geocode_url)
-    #     results = results.json()
+    for facility in facilities:
+    # Loop thru facilities, create geocode request url for each
 
-    #     if len(results['results']) == 0:
-    #         output = None
-    #     else:
-    #         answer = results['results'][0]
-    #         facility.latitude = answer.get('geometry').get('location').get('lat')
-    #         facility.longitude = answer.get('geometry').get('location').get('lng')
-    #         facility.google_place_id = answer.get("place_id")
-    #     completed.append(facility.f_id)
+            geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility.city}+{facility.state}+{facility.f_zip}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
+            results = requests.get(geocode_url)
+            results = results.json()
 
-    facility = facilities[1]
-    geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility.city}+{facility.state}+{facility.f_zip}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
-    results = requests.get(geocode_url)
-    results = results.json()
+            if len(results['results']) != 0:
+                answer = results['results'][0]
+                facility.latitude = answer.get('geometry').get('location').get('lat')
+                facility.longitude = answer.get('geometry').get('location').get('lng')
+                facility.google_place_id = answer.get("place_id")
+                completed.append(facility.f_id)
+            else:
+                completed.append('FAILED')
 
-    if len(results['results']) == 0:
-        output = None
-    else:
-        answer = results['results'][0]
-        output = {
-            "latitude": answer.get('geometry').get('location').get('lat'),
-            "longitude": answer.get('geometry').get('location').get('lng'),
-            "google_place_id": answer.get("place_id")}
+    db.session.commit()
+    output = completed
+
+    # facility = facilities[0]
+    # geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility.city}+{facility.state}+{facility.f_zip}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
+    # results = requests.get(geocode_url)
+    # results = results.json()
+
+    # if len(results['results']) == 0:
+    #     output = None
+    # else:
+    #     answer = results['results'][0]
+    #     facility.latitude = answer.get('geometry').get('location').get('lat')
+    #     facility.longitude = answer.get('geometry').get('location').get('lng')
+    #     facility.google_place_id = answer.get("place_id")
+    #     db.session.commit()
+    #     output=["SUCCESS!", facility.latitude, facility.longitude, facility.google_place_id]
+
+        # output = {
+        #     "latitude": answer.get('geometry').get('location').get('lat'),
+        #     "longitude": answer.get('geometry').get('location').get('lng'),
+        #     "google_place_id": answer.get("place_id")}
 
     return render_template('geocode-request.html', output=output)
 

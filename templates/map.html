@@ -47,6 +47,16 @@
         icon: icon,
       });
 
+  // This area currently not functioning - START
+
+      for (const facility of facilities) {
+        const position = {lat: facility.latitude, lng: facility.longitude};
+        const title = facility.name
+        addMarker(position, map, title, icon);
+      }; 
+
+  // This area currently not functioning - END
+
  // This area currently not functioning - START
       const infowindow = new google.maps.InfoWindow({
         content: 'Test Window'
@@ -64,12 +74,6 @@
       return marker;
     };
 
-// This area currently not functioning - START
-    for (const facility of facilities) {
-      addMarker(icon, facility.address, facility.name, map);
-    }; 
-    // ### TODO - Need to add in lat+long rather than address
-// This area currently not functioning - END
 
   </script>
 
