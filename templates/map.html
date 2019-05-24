@@ -16,18 +16,15 @@
       padding: 0;
     }
   </style>
-{% endblock %}
 
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+{% endblock %}
   
 {% block content %}
 
   <div id="map"></div>
-  
+
   <script>
-    // const icon = {
-    //   url: 'https://svgsilh.com/svg_v2/152964.svg',
-    //   scaledSize: new google.maps.Size(30, 30)
-    // };
 
     function initMap() {
       const map = new google.maps.Map(document.getElementById('map'), {
@@ -36,42 +33,37 @@
       });
 
       const icon = {
-        url: 'https://svgsilh.com/svg_v2/152964.svg',
-        scaledSize: new google.maps.Size(30, 30)
+        url: 'https://svgsilh.com/svg_v2/1093167.svg',
+        scaledSize: new google.maps.Size(15, 15)
       };
-      
-      const testMarker = new google.maps.Marker({
-        position: {lat: 35.2417118, lng: -120.6776186},
-        map: map, 
-        title: "Children's Montessori SLO", 
-        icon: icon,
+
+      const infowindow = new google.maps.InfoWindow({
+        content: 'Test Window';
       });
 
-  // This area currently not functioning - START
-
-      for (const facility of facilities) {
-        const position = {lat: facility.latitude, lng: facility.longitude};
-        const title = facility.name
-        addMarker(position, map, title, icon);
-      }; 
-
-  // This area currently not functioning - END
+      $.get('/mapping-facilities.json', (data) => {
+        for (const f_id in data) {
+          const marker = new google.maps.Marker({ 
+            icon: icon,
+            map: map,
+            position: {
+              lat: parseFloat(data[f_id]['lat']),
+              lng: parseFloat(data[f_id]['lng'])
+            },
+            title: data[f_id]['title'], 
+            });
+          marker.addListener('click', function() {
+            infowindow.open(map, marker);
+          });
+        }
+      });
 
  // This area currently not functioning - START
-      const infowindow = new google.maps.InfoWindow({
-        content: 'Test Window'
-      })
+      
 
-      marker.addListener('click', function() {
-        infowindow.open(map, marker);
-      });
+
  // This area currently not functioning - END
 
-    };
-
-    function addMarker(icon, position, title, map) {
-      const marker = new google.maps.Marker({ position, map, title, icon });
-      return marker;
     };
 
 
@@ -80,4 +72,5 @@
   <script async defer
   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U&callback=initMap">
   </script>
+  
 {% endblock %}

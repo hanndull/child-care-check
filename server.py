@@ -5,12 +5,13 @@
 ##### Import Libraries #######################################################
 
 from jinja2 import StrictUndefined
-from flask import Flask, render_template, redirect, request, flash, session
+from flask import Flask, render_template, redirect, request, flash, session, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, Facility, Visitation, Citation, CitationDefinition
 from sqlalchemy import func, distinct
 from dateutil.parser import *
 import requests
+import time
 
 ##### Create App #############################################################
 
@@ -36,6 +37,7 @@ def display_filter_form():
     """Display filter fields of form"""
 
     return render_template('filter.html')
+
 
 @app.route('/filter-results', methods=['POST'])
 def process_form():
@@ -125,11 +127,32 @@ def show_facility_details(f_id):
 
 @app.route('/map')
 def show_map():
-    """Return page with facilities plotted to map"""
+    """Return page with facilities plotted to map
+    Data for map pins coming from @app.route('/mapping-facilities.json')
+    """
 
-    facilities = Facility.query.filter(Facility.longitude != None).all()
+    return render_template('map.html')
 
-    return render_template('map.html', facilities=facilities)
+
+@app.route('/mapping-facilities.json')
+def create_map_json():
+    """Create json for map out of facilities query"""
+
+    facilities_list = Facility.query.filter(Facility.longitude != None, Facility.status == 'LICENSED').all() 
+    
+    facilities = {}
+    
+    for facility in facilities_list:     
+        mapinfo = {
+                    "title": facility.name,
+                    "lat": facility.latitude, 
+                    "lng": facility.longitude,
+                    "status": facility.status,
+                    }
+
+        facilities[facility.f_id] = mapinfo
+    
+    return jsonify(facilities)
 
 
 @app.route('/geocode-request', methods=['POST', 'GET'])
@@ -138,13 +161,24 @@ def send_geocode_request():
     Also adds latitude, longitude, and Google Place ID to db.
     """
 
-    #facilities = Facility.query.filter(Facility.f_id > 55, Facility.f_id < 101).all()
+    facilities = Facility.query.filter(Facility.f_id > 3324).all()
+    #stopped at: 3225
     completed = []
+    failed = []
 
     for facility in facilities:
-    # Loop thru facilities, create geocode request url for each
+            
+            if '#' in facility.address:
+                address = ''
+                for charac in facility.address:
+                    if charac != '#':
+                        address += charac
+                    else: 
+                        break
+            else:
+                address = facility.address 
 
-            geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility.city}+{facility.state}+{facility.f_zip}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
+            geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={address}+{facility.city}+{facility.state}+{facility.f_zip}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
             results = requests.get(geocode_url)
             results = results.json()
 
@@ -153,37 +187,15 @@ def send_geocode_request():
                 facility.latitude = answer.get('geometry').get('location').get('lat')
                 facility.longitude = answer.get('geometry').get('location').get('lng')
                 facility.google_place_id = answer.get("place_id")
+                db.session.commit()
                 completed.append(facility.f_id)
             else:
                 completed.append('FAILED')
+                failed.append(facility.f_id)
 
-    db.session.commit()
-    output = completed
-
-    # facility = facilities[0]
-    # geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility.city}+{facility.state}+{facility.f_zip}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
-    # results = requests.get(geocode_url)
-    # results = results.json()
-
-    # if len(results['results']) == 0:
-    #     output = None
-    # else:
-    #     answer = results['results'][0]
-    #     facility.latitude = answer.get('geometry').get('location').get('lat')
-    #     facility.longitude = answer.get('geometry').get('location').get('lng')
-    #     facility.google_place_id = answer.get("place_id")
-    #     db.session.commit()
-    #     output=["SUCCESS!", facility.latitude, facility.longitude, facility.google_place_id]
-
-        # output = {
-        #     "latitude": answer.get('geometry').get('location').get('lat'),
-        #     "longitude": answer.get('geometry').get('location').get('lng'),
-        #     "google_place_id": answer.get("place_id")}
+    output = {'completed': completed, 'failed': failed}
 
     return render_template('geocode-request.html', output=output)
-
-#@app.route('/map/<facility_id>')
-
 
 
 ##### Dunder Main ############################################################
