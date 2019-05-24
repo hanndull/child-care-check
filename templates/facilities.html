@@ -6,8 +6,8 @@
 <h2>Note that this list does not include home-based facilities.</h2>
     
     {% for facility in facilities %}
-        <p><a href="/facilities/{{ facility.facility_id }}">
-            {{ facility.facility_name }}
+        <p><a href="/facilities/{{ facility.f_id }}">
+            {{ facility.name }}
         </a></p>
     
     {% endfor %}

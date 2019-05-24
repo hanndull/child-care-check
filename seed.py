@@ -53,18 +53,18 @@ def load_facilities(processed_file):
             no_complaints = False
 
         facility = Facility(
-                    facility_type = row[0],
-                    facility_number = row[1], 
-                    facility_name = name,
-                    facility_phone = row[5],
-                    facility_address = address, 
-                    facility_city = row[7],
-                    facility_state = row[8], 
-                    facility_zip = int(row[9][:6]), 
-                    facility_county = row[10], 
-                    facility_capacity = row[12],
+                    f_type = row[0],
+                    number = row[1], 
+                    name = name,
+                    phone = row[5],
+                    address = address, 
+                    city = row[7],
+                    state = row[8], 
+                    f_zip = int(row[9][:6]), 
+                    county = row[10], 
+                    capacity = row[12],
                     no_complaints = no_complaints, 
-                    facility_status = row[13],
+                    status = row[13],
                     )
 
         db.session.add(facility)
@@ -109,12 +109,12 @@ def load_visitations(processed_file):
                     else:
                         inspection=False
                     
-                    facility = Facility.query.filter_by(facility_number=f'{row[1]}').one()
+                    facility = Facility.query.filter_by(number=f'{row[1]}').one()
 
                     visitation = Visitation(
-                        visitation_date = visit_date,
+                        date = visit_date,
                         is_inspection = inspection,
-                        facility_id = facility.facility_id,
+                        f_id = facility.f_id,
                         )
 
                     db.session.add(visitation)
@@ -131,36 +131,36 @@ def load_citations(processed_file):
         
         if row[21] != '':
 
-            facility = Facility.query.filter_by(facility_number=f'{row[1]}').one()
+            facility = Facility.query.filter_by(number=f'{row[1]}').one()
             
             ##################### split cell by space ##########################
             cit_list = row[22].split("','")
             code_list = row[21].split("','")
         
             index = 0
-            for citation_date in cit_list:
+            for date in cit_list:
                 ## Loop through list of citation dates contained in CSV cell
                 
                 #citation_date = citation_date.strip()
-                citation_date = parse(citation_date.strip(), dayfirst=False)
+                date = parse(date.strip(), dayfirst=False)
 
                 if len(cit_list) == len(code_list):
-                    citation_code = code_list[index].strip()
+                    code = code_list[index].strip()
                 else:
-                    citation_code = None
+                    code = None
 
-                visit = Visitation.query.filter_by(facility_id = facility.facility_id, visitation_date=citation_date).first()
+                visit = Visitation.query.filter_by(f_id = facility.f_id, date=date).first()
                 
                 if visit:
-                    visitation_id = visit.visitation_id
+                    v_id = visit.v_id
                 else:
-                    visitation_id = None
+                    v_id = None
 
                 citation = Citation(
-                        citation_date = citation_date,
-                        citation_code = citation_code,
-                        facility_id = facility.facility_id,
-                        visitation_id = visitation_id,
+                        date = date,
+                        code = code,
+                        f_id = facility.f_id,
+                        v_id = v_id,
                     )
 
                 db.session.add(citation)
@@ -179,9 +179,9 @@ def load_cit_definitions(processed_file):
     for row in processed_file:
 
         cit_def = CitationDefinition(
-            citation_code=citation_code,
-            citation_description=citation_description,
-            citation_url=citation_url,
+            code=code,
+            description=description,
+            url=url,
             )
 
         db.session.add(cit_def)

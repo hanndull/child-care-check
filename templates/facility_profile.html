@@ -1,20 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h3>CA Child Care Center Facilities</h3>
+<h3>CA Child Care Center Facility Profile</h3>
 
-<h2>{{ facility.facility_name }}</h2>
-<h4>Lisencing Status: {{ facility.facility_status }}</h4>
+<h2>{{ facility.name }}</h2>
+<p><a href={{ f_url }} target="_blank">Learn More About This Facility on the 
+CA Dept of Social Services Website</a></p>
+<h4>Lisencing Status: {{ facility.status }} | Capacity: {{ facility.capacity }} children</h4>
 
 
 <h3>Visitations and Inspections --</h3>
     {% if facility.visitations %}
         <ul>
-        {% for visit in facility.visitations|sort(attribute='visitation_date', reverse = True) %}
+        {% for visit in facility.visitations|sort(attribute='date', reverse = True) %}
         <!-- sorted lists using: https://stackoverflow.com/a/39051279 -->
 
-            <li><b>Visit Date:</b> {{ visit.visitation_date.strftime('%Y-%m-%d') }}; 
-                <b>Was is an inspection?</b> {{ visit.is_inspection }}</li>
+            <li>
+                <b>Visit Date:</b> {{ visit.date.strftime('%Y-%m-%d') }}; 
+                <b>Was is an inspection?</b> 
+                    {% if visit.is_inspection == 'true' %}
+                        yes
+                    {% else %}
+                        no
+                    {% endif %}
+            </li>
         {% endfor %}
         </ul>
     {% else %}
@@ -33,9 +42,13 @@
 <h3>Citations --</h3>
     {% if facility.citations %}
         <ul>
-        {% for citation in facility.citations|sort(attribute='citation_date', reverse = True) %}
-            <li><b>{{ citation.citation_date.strftime('%Y-%m-%d') }}:</b> 
-            {{ citation.citation_code }}</li>
+        {% for citation in facility.citations|sort(attribute='date', reverse = True) %}
+            
+            <li>
+                <b>{{ citation.date.strftime('%Y-%m-%d') }}:</b> 
+                {{ citation.code }}
+            </li>
+
         {% endfor %}
         </ul>
     {% else %}
@@ -44,6 +57,7 @@
 
 
 
-<h3><a href="/facilities">Back to All Facilities</a></h3>
+<h3><a href="/facilities">Return to All Facilities</a> | 
+    <a href="/filter">Return to Filters</a></h3>
 
 {% endblock %}

@@ -21,11 +21,9 @@
   
 {% block content %}
 
-
   <div id="map"></div>
   
   <script>
-
     // const icon = {
     //   url: 'https://svgsilh.com/svg_v2/152964.svg',
     //   scaledSize: new google.maps.Size(30, 30)
@@ -68,7 +66,7 @@
 
 // This area currently not functioning - START
     for (const facility of facilities) {
-      addMarker(icon, facility.facility_address, facility.facility_name, map);
+      addMarker(icon, facility.address, facility.name, map);
     }; 
     // ### TODO - Need to add in lat+long rather than address
 // This area currently not functioning - END

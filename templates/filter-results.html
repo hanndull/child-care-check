@@ -7,8 +7,8 @@
     
     {% for facility in facilities %}
         <p>
-            <a href="/facilities/{{ facility.facility_id }}">
-            {{ facility.facility_name }}</a>
+            <a href="/facilities/{{ facility.f_id }}">
+            {{ facility.name }}</a>
         </p>
     {% endfor %}
 {% else %}

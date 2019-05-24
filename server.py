@@ -10,6 +10,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, Facility, Visitation, Citation, CitationDefinition
 from sqlalchemy import func, distinct
 from dateutil.parser import *
+import requests
 
 ##### Create App #############################################################
 
@@ -52,10 +53,10 @@ def process_form():
         fquery = Facility.query ### Base query
 
         if name:
-            fquery = fquery.filter(Facility.facility_name.like(f'%{name}%'))
+            fquery = fquery.filter(Facility.name.like(f'%{name}%'))
         
         if zipcode:
-            fquery = fquery.filter(Facility.facility_zip == int(zipcode))
+            fquery = fquery.filter(Facility.f_zip == int(zipcode))
 
         if min_cit:
             ### Below query based off of https://stackoverflow.com/a/38639550
@@ -74,7 +75,7 @@ def process_form():
         if status:
             if status == 'PROBATION':
                 status = 'ON PROBATION'
-            fquery = fquery.filter(Facility.facility_status == status)
+            fquery = fquery.filter(Facility.status == status)
 
         if suppress_date:
             ### Show only facilities who have had 0 citations since input date
@@ -82,8 +83,8 @@ def process_form():
 
             fquery = (fquery
                 .join(Citation)
-                .group_by(Facility.facility_id)
-                .having(func.max(Citation.citation_date) <= suppress_date))
+                .group_by(Facility.f_id)
+                .having(func.max(Citation.date) <= suppress_date))
 
         facilities = fquery.all() ### Conglomerate all applicable queries
 
@@ -111,13 +112,15 @@ def show_facilities():
     return render_template('facilities.html', facilities=facilities)
 
 
-@app.route('/facilities/<facility_id>')
-def show_facility_details(facility_id):
+@app.route('/facilities/<f_id>')
+def show_facility_details(f_id):
     """Facility details info page"""
 
-    facility = Facility.query.filter_by(facility_id=facility_id).one()
+    facility = Facility.query.filter_by(f_id=f_id).one()
 
-    return render_template('/facility_profile.html', facility=facility)
+    f_url = f'https://secure.dss.ca.gov/CareFacilitySearch/FacDetail/{facility.number}'
+
+    return render_template('/facility_profile.html', facility=facility, f_url=f_url)
 
 
 @app.route('/map')
@@ -129,19 +132,45 @@ def show_map():
     return render_template('map.html', facilities=facilities)
 
 
-@app.route('/geocode-request')
+@app.route('/geocode-request', methods=['POST', 'GET'])
 def send_geocode_request():
+    """Requesting of geocodes via Google Geocode API for all facilities in db.
+    Also adds latitude, longitude, and Google Place ID to db.
+    """
 
     facilities = Facility.query.all()
+    # completed = []
 
     # for facility in facilities:
-        # Loop thru facilities, create geocode request url for each
+    # # Loop thru facilities, create geocode request url for each
+    #     geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility.city}+{facility.state}+{facility.f_zip}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
+    #     results = requests.get(geocode_url)
+    #     results = results.json()
 
-        ### TODO - this is currently not saving to anything--
-        ### Need to figure out if Google Geocode req is viable for this project
-        # (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility_city}+{facility_state}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
+    #     if len(results['results']) == 0:
+    #         output = None
+    #     else:
+    #         answer = results['results'][0]
+    #         facility.latitude = answer.get('geometry').get('location').get('lat')
+    #         facility.longitude = answer.get('geometry').get('location').get('lng')
+    #         facility.google_place_id = answer.get("place_id")
+    #     completed.append(facility.f_id)
 
-    return 
+    facility = facilities[1]
+    geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={facility.address}+{facility.city}+{facility.state}+{facility.f_zip}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
+    results = requests.get(geocode_url)
+    results = results.json()
+
+    if len(results['results']) == 0:
+        output = None
+    else:
+        answer = results['results'][0]
+        output = {
+            "latitude": answer.get('geometry').get('location').get('lat'),
+            "longitude": answer.get('geometry').get('location').get('lng'),
+            "google_place_id": answer.get("place_id")}
+
+    return render_template('geocode-request.html', output=output)
 
 #@app.route('/map/<facility_id>')
 
