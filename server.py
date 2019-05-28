@@ -161,13 +161,14 @@ def send_geocode_request():
     Also adds latitude, longitude, and Google Place ID to db.
     """
 
-    facilities = Facility.query.filter(Facility.f_id > 3324).all()
-    #stopped at: 3225
+    facilities = Facility.query.filter(Facility.longitude == None).all()
+
     completed = []
     failed = []
+    counter = 0
 
     for facility in facilities:
-            
+        if counter <= 5500:
             if '#' in facility.address:
                 address = ''
                 for charac in facility.address:
@@ -187,11 +188,17 @@ def send_geocode_request():
                 facility.latitude = answer.get('geometry').get('location').get('lat')
                 facility.longitude = answer.get('geometry').get('location').get('lng')
                 facility.google_place_id = answer.get("place_id")
+                #print('>>>>>>>>>>>>>', facility.longitude)
                 db.session.commit()
                 completed.append(facility.f_id)
+
             else:
                 completed.append('FAILED')
                 failed.append(facility.f_id)
+            if len(completed)%100 == 0:
+                print (">>>>>>>>> completed: ",len(completed), "failed: ", len(failed))
+            
+            counter += 1
 
     output = {'completed': completed, 'failed': failed}
 

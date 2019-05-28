@@ -43,6 +43,7 @@
 
       $.get('/mapping-facilities.json', (data) => {
         for (const f_id in data) {
+          
           const marker = new google.maps.Marker({ 
             icon: icon,
             map: map,
@@ -51,19 +52,13 @@
               lng: parseFloat(data[f_id]['lng'])
             },
             title: data[f_id]['title'], 
-            });
-          marker.addListener('click', function() {
-            infowindow.open(map, marker);
+          });
+          
+          marker.addListener('click', () => {
+            infowindow.open(map, marker)
           });
         }
       });
-
- // This area currently not functioning - START
-      
-
-
- // This area currently not functioning - END
-
     };
 
 
