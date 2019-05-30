@@ -21,29 +21,90 @@
 {% endblock %}
   
 {% block content %}
+  
+  <div id="filters">
+    <h2>Filter your results.</h2>
+
+      <form id="filter-form">
+              
+              <label for='name'>Facility Name </label>
+              <input id='name' type='text' name='name' placeholder='ex: City Kids'><br>
+              
+              <label for='zipcode'>Facility Zip Code </label>
+              <input id='zipcode' type='text' name='zipcode' placeholder='ex: 93636' size=5 pattern="[0-9]*"><br>
+              <!-- Pattern attr from https://css-tricks.com/html-for-zip-codes/ -->
+              
+              <label for='min-cit'>Minimum Citation Count </label>
+              <input id='min-cit' type='number' name='min_cit' placeholder='ex: 2'><br>
+              
+              <label for='max-cit'>Maximum Citation Count </label>
+              <input id='max-cit' type='number' name='max_cit' placeholder='ex: 6'><br>
+
+              <label for="type-select">Facility Type </label>
+              <select id="type-select" name="type">
+                      <option value="">--Choose an option--</option>
+                      <option value="infant">Infant Center</option>
+                      <option value="ill">Day Care Center - Ill</option>
+                      <option value="day">Day Care Center</option>
+                      <option value="school">School Age Day Care Center</option>
+              </select><br>
+              
+              <label for="status-select">Facility Status </label>
+              <select id="status-select" name='status'>
+                      <option value="">--Choose an option--</option> 
+                      <option value="inactive">Inactive</option>
+                      <option value="probation">On Probation</option>
+                      <option value="closed">Closed</option>
+              </select><br>     
+              
+              <label for="suppress-recent">Show only facilities who have not have a citation since </label> 
+              <input id="suppress-recent" type='date' name='suppress_date' min="2013-01-01"><br> 
+              <input type='submit' value='Filter!'>
+
+      </form><br>
+  </div>
+
 
   <div id="map"></div>
 
   <script>
 
+    $("#filter-form").submit((event) => {
+    // JQuery event listener for click on submit of form
+      event.preventDefault();
+      console.log("evt listener prevented default");
+      initMap();
+    });
+
     function initMap() {
+      // funct to initialize instance of Google Map
+      console.log("Entered initMap");
+      
       const map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 37.8, lng: -120},
         zoom: 5
       });
 
       const icon = {
+        // variable to store custom icon info
         url: 'https://svgsilh.com/svg_v2/1093167.svg',
         scaledSize: new google.maps.Size(15, 15)
       };
 
-      const infowindow = new google.maps.InfoWindow({
-        content: 'Test Window';
-      });
-
-      $.get('/mapping-facilities.json', (data) => {
+      const formData = $("#filter-form").serialize()
+      // Store all input from form fields in variable 
+      console.log("retrieved form data", formData);
+      $.get('/filter-results.json', formData, (data) => {
+        // Ajax call for JSON of query, using formData (form field info)
+        console.log("data:", data);
         for (const f_id in data) {
-          
+          // success callback function to create marker and window for ea facility
+          console.log(f_id, "in for loop for marker creation");
+          const infowindow = new google.maps.InfoWindow({
+            content: data[f_id]['title'],
+            maxWidth: 300
+            });
+
           const marker = new google.maps.Marker({ 
             icon: icon,
             map: map,
@@ -58,14 +119,56 @@
             infowindow.open(map, marker)
           });
         }
-      });
-    };
+      })
+    }
+
+
+    // function initMap() {
+    //   const map = new google.maps.Map(document.getElementById('map'), {
+    //     center: {lat: 37.8, lng: -120},
+    //     zoom: 5
+    //   });
+
+    //   const icon = {
+    //     url: 'https://svgsilh.com/svg_v2/1093167.svg',
+    //     scaledSize: new google.maps.Size(15, 15)
+    //   };
+
+    //   const infowindow = new google.maps.InfoWindow({
+    //     content: '<p>Test Window</p>'
+    //   });
+
+    //   $.get('/mapping-facilities.json', (data) => {
+    //     //$.get('/filter-results.json', (data) => {
+    //     for (const f_id in data) {
+          
+    //       const infowindow = new google.maps.InfoWindow({
+    //         content: data[f_id]['title'],
+    //         maxWidth: 300
+    //         });
+
+    //       const marker = new google.maps.Marker({ 
+    //         icon: icon,
+    //         map: map,
+    //         position: {
+    //           lat: parseFloat(data[f_id]['lat']),
+    //           lng: parseFloat(data[f_id]['lng'])
+    //         },
+    //         title: data[f_id]['title'], 
+    //       });
+          
+    //       marker.addListener('click', () => {
+    //         infowindow.open(map, marker)
+    //       });
+    //     }
+    //   });
+    // }
 
 
   </script>
 
   <script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U&callback=initMap">
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U">
   </script>
   
 {% endblock %}

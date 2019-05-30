@@ -39,18 +39,19 @@ def display_filter_form():
     return render_template('filter.html')
 
 
-@app.route('/filter-results', methods=['POST'])
+@app.route('/filter-results.json')
 def process_form():
     """Recieve and store filtration input"""
 
-    name = request.form.get('name').upper()
-    zipcode = request.form.get('zipcode')
-    min_cit = request.form.get('min_cit')
-    max_cit = request.form.get('max_cit')
-    status = request.form.get('status').upper()
-    suppress_date = request.form.get('suppress_date')
+    name = request.args.get('name').upper()
+    zipcode = request.args.get('zipcode')
+    min_cit = request.args.get('min_cit')
+    max_cit = request.args.get('max_cit')
+    status = request.args.get('status').upper()
+    suppress_date = request.args.get('suppress_date')
+    f_type = request.args.get('type')
 
-    if name or zipcode or min_cit or max_cit or status or suppress_date:
+    if name or zipcode or min_cit or max_cit or status or suppress_date or f_type:
 
         fquery = Facility.query ### Base query
 
@@ -88,21 +89,65 @@ def process_form():
                 .group_by(Facility.f_id)
                 .having(func.max(Citation.date) <= suppress_date))
 
+        if f_type:
+            if f_type == 'infant':
+                f_type = 'INFANT CENTER'
+            elif f_type == 'ill':
+                f_type = 'DAY CARE CENTER - ILL CENTER'
+            elif f_type == 'day':
+                f_type = 'DAY CARE CENTER'
+            elif f_type == 'school':
+                f_type = 'SCHOOL AGE DAY CARE CENTER'
+            fquery = fquery.filter(Facility.f_type == f_type)
+
         facilities = fquery.all() ### Conglomerate all applicable queries
 
         facility_count = len(facilities)
 
         flash('Applying your requested filters now...')
 
-        return render_template('filter-results.html', 
-                                facilities=facilities, 
-                                facility_count=facility_count) 
+        facilities_dict = {}
+    
+        for facility in facilities:     
+            mapinfo = {
+                        "title": facility.name,
+                        "lat": facility.latitude, 
+                        "lng": facility.longitude,
+                        "status": facility.status,
+                        }
+
+            facilities_dict[facility.f_id] = mapinfo
+        
+        return jsonify(facilities_dict)
+
+
+        # return render_template('filter-results.html', 
+        #                         facilities=facilities, 
+        #                         facility_count=facility_count)
+        
+        
+        # return render_template('map.html',
+        #                         create_map_json(facilities),
+        #                         facility_count=facility_count,
+        #                         ) 
+                                #fquery=fquery,
+
+
+
             ### TODO - figure out how to diplay map w/ filtered points
     
     else:
         flash('No filters were applied.')
+        ### TODO - Check to see if flash still populates page 
 
-        return redirect('/') 
+        return jsonify({}) 
+
+
+@app.route('/filter-results')
+def render_map():
+    """Test route to see if I can send results to map from same route"""
+
+    return render_template('map.html')
 
 
 @app.route('/facilities')
@@ -139,7 +184,9 @@ def create_map_json():
     """Create json for map out of facilities query"""
 
     facilities_list = Facility.query.filter(Facility.longitude != None, Facility.status == 'LICENSED').all() 
-    
+    ### TODO - add on a sort
+    #facilities = query_params.all()
+
     facilities = {}
     
     for facility in facilities_list:     

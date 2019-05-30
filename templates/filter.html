@@ -17,15 +17,24 @@
         
         <label for='max-cit'>Maximum Citation Count </label>
         <input id='max-cit' type='number' name='max_cit' placeholder='ex: 6'><br>
+
+        <label for="type-select">Facility Type </label>
+        <select id="type-select" name="type">
+                <option value="">--Choose an option--</option>
+                <option value="infant">Infant Center</option>
+                <option value="ill">Day Care Center - Ill</option>
+                <option value="day">Day Care Center</option>
+                <option value="school">School Age Day Care Center</option>
+        </select><br>
         
         <label for="status-select">Facility Status </label>
         <select id="status-select" name='status'>
                 <option value="">--Choose an option--</option>
-                <option value="licensed">LICENSED</option>
-                <option value="pending">PENDING</option>
-                <option value="inactive">INACTIVE</option>
-                <option value="probation">ON PROBATION</option>
-                <option value="closed">CLOSED</option>
+                <option value="licensed">Licensed</option>
+                <option value="pending">Pending</option>
+                <option value="inactive">Inactive</option>
+                <option value="probation">On Probation</option>
+                <option value="closed">Closed</option>
         </select><br>     
         
         <label for="suppress-recent">Show only facilities who have not have a citation since </label> 
