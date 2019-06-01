@@ -11,10 +11,15 @@
     }
     /* Optional: Makes the sample page fill the window. */
     html, body {
-      height: 85%;
+      height: 100%;
       margin: 0;
       padding: 0;
     }
+
+    #filters {
+      margin: 10px;
+    }
+
   </style>
 
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -26,6 +31,7 @@
     <h2>Filter your results.</h2>
 
       <form id="filter-form">
+        <!-- look into refactoring with Jinja -->
               
               <label for='name'>Facility Name </label>
               <input id='name' type='text' name='name' placeholder='ex: City Kids'><br>
@@ -45,13 +51,15 @@
                       <option value="">--Choose an option--</option>
                       <option value="infant">Infant Center</option>
                       <option value="ill">Day Care Center - Ill</option>
-                      <option value="day">Day Care Center</option>
+                      <option value="prek">Day Care Center - PreK</option>
                       <option value="school">School Age Day Care Center</option>
               </select><br>
               
               <label for="status-select">Facility Status </label>
               <select id="status-select" name='status'>
                       <option value="">--Choose an option--</option> 
+                      <option value="licensed">Licensed</option>
+                      <option value="pending">Pending</option>
                       <option value="inactive">Inactive</option>
                       <option value="probation">On Probation</option>
                       <option value="closed">Closed</option>
@@ -72,38 +80,61 @@
     $("#filter-form").submit((event) => {
     // JQuery event listener for click on submit of form
       event.preventDefault();
-      console.log("evt listener prevented default");
-      initMap();
+      initFilteredMap();
     });
 
-    function initMap() {
-      // funct to initialize instance of Google Map
-      console.log("Entered initMap");
-      
+    function initFilteredMap() {
+      // Recreates Google Map once user applies filters
+      // TODO - LOOK UP HOW TO AUTOZOOM
       const map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 37.8, lng: -120},
-        zoom: 5
+        zoom: 6
       });
 
-      const icon = {
+      const iconNoCitations = {
         // variable to store custom icon info
-        url: 'https://svgsilh.com/svg_v2/1093167.svg',
-        scaledSize: new google.maps.Size(15, 15)
+        url: 'https://image.flaticon.com/icons/svg/149/149983.svg',
+        scaledSize: new google.maps.Size(20, 30)
       };
+
+      const iconCitations = {
+        url: 'https://image.flaticon.com/icons/svg/149/149059.svg',
+        scaledSize: new google.maps.Size(20, 30)
+      }
 
       const formData = $("#filter-form").serialize()
       // Store all input from form fields in variable 
-      console.log("retrieved form data", formData);
+
       $.get('/filter-results.json', formData, (data) => {
         // Ajax call for JSON of query, using formData (form field info)
-        console.log("data:", data);
+ 
         for (const f_id in data) {
           // success callback function to create marker and window for ea facility
-          console.log(f_id, "in for loop for marker creation");
+
+          const content = (
+            '<div id="content"'+
+            '<h3>'+
+            data[f_id]['title']+
+            '</h3>'+
+            '<h3>Citation Count:'+
+            data[f_id]['citation_count']+
+            '</h3>'+
+            '<p><a href="/facilities/'+ 
+            f_id+ 
+            '" target="_blank">Facility Page</a></p>'+
+            '</div>'
+            )
+
           const infowindow = new google.maps.InfoWindow({
-            content: data[f_id]['title'],
-            maxWidth: 300
+            content: content,
+            maxWidth: 400
             });
+
+          if (data[f_id]['citation_count'] > 0) {
+            icon = iconCitations;
+          } else {
+            icon = iconNoCitations;
+          }
 
           const marker = new google.maps.Marker({ 
             icon: icon,
@@ -112,7 +143,7 @@
               lat: parseFloat(data[f_id]['lat']),
               lng: parseFloat(data[f_id]['lng'])
             },
-            title: data[f_id]['title'], 
+            title: data[f_id]['title'],
           });
           
           marker.addListener('click', () => {
@@ -123,10 +154,11 @@
     }
 
 
-    // function initMap() {
+    // function initMapBase() {
+    //   // Creates map that will show up when user opens page
     //   const map = new google.maps.Map(document.getElementById('map'), {
     //     center: {lat: 37.8, lng: -120},
-    //     zoom: 5
+    //     zoom: 6
     //   });
 
     //   const icon = {
@@ -138,13 +170,27 @@
     //     content: '<p>Test Window</p>'
     //   });
 
-    //   $.get('/mapping-facilities.json', (data) => {
-    //     //$.get('/filter-results.json', (data) => {
+    //   $.get('/filter-results.json', (data) => {
+
     //     for (const f_id in data) {
           
+    //       const content = (
+    //         '<div id="content"'+
+    //         '<h1>'+
+    //         data[f_id]['title']+
+    //         '</h1>'+
+    //         '<p><a href="/facilities/'+ 
+    //         f_id+ 
+    //         '" target="_blank">Facility Page</a></p>'+
+    //         '<h3>Citation Count:'+
+    //         data[f_id]['citation_count']+
+    //         '</h3>'+
+    //         '</div>'
+    //         )
+
     //       const infowindow = new google.maps.InfoWindow({
-    //         content: data[f_id]['title'],
-    //         maxWidth: 300
+    //         content: content,
+    //         maxWidth: 400
     //         });
 
     //       const marker = new google.maps.Marker({ 
@@ -154,7 +200,7 @@
     //           lat: parseFloat(data[f_id]['lat']),
     //           lng: parseFloat(data[f_id]['lng'])
     //         },
-    //         title: data[f_id]['title'], 
+    //         title: data[f_id]['title'],
     //       });
           
     //       marker.addListener('click', () => {
@@ -168,7 +214,7 @@
   </script>
 
   <script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U">
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U&callback=initFilteredMap">
   </script>
   
 {% endblock %}
