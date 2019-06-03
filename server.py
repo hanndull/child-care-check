@@ -94,28 +94,38 @@ def create_map_json():
 @app.route('/filter-results.json')
 def process_form():
     """Recieve and store filtration input into JSON"""
-    status = 'LICENSED'
 
-    name = request.args.get('name').upper()
+    name = request.args.get('name')
     zipcode = request.args.get('zipcode')
+    city = request.args.get('city')
     min_cit = request.args.get('min_cit')
     max_cit = request.args.get('max_cit')
-    if request.args.get('status').upper():
-        status = request.args.get('status').upper()
+    status = request.args.get('status')
     suppress_date = request.args.get('suppress_date')
     f_type = request.args.get('type')
+    page_num = request.args.get('page_num') ### For use in pagination
 
-    ### TODO - Citation date and count may not be working together
+    ### TODO - Citation date and counts may not be working together
 
-    if name or zipcode or min_cit or max_cit or status or suppress_date or f_type:
 
-        fquery = Facility.query ### Base query
+    fquery = Facility.query.options(db.joinedload('citations')) ### Base query
+
+    fquery = fquery.offset(100 * page_num).limit(100)
+        ### Add offset and limit to keep ea query to ~100
+        ### Logic for pagination so front end can request specific "page"
+
+    if name or zipcode or city or min_cit or max_cit or status or suppress_date or f_type:
 
         if name:
+            name = name.upper()
             fquery = fquery.filter(Facility.name.like(f'%{name}%'))
         
         if zipcode:
             fquery = fquery.filter(Facility.f_zip == int(zipcode))
+
+        if city:
+            city = city.upper()
+            fquery = fquery.filter(Facility.city.like(f'%{city}%'))            
 
         if min_cit:
             ### Below query based off of https://stackoverflow.com/a/38639550
@@ -131,11 +141,6 @@ def process_form():
                 .group_by(Facility)
                 .having(func.count_(Facility.citations) <= max_cit))
 
-        if status:
-            if status == 'PROBATION':
-                status = 'ON PROBATION'
-            fquery = fquery.filter(Facility.status == status)
-
         if suppress_date:
             ### Show only facilities who have had 0 citations since input date
             suppress_date = isoparse(suppress_date)
@@ -144,6 +149,12 @@ def process_form():
                 .join(Citation)
                 .group_by(Facility.f_id)
                 .having(func.max(Citation.date) <= suppress_date))
+        
+        if status:
+            status = status.upper()
+            if status == 'PROBATION':
+                status = 'ON PROBATION'
+            fquery = fquery.filter(Facility.status == status)
 
         if f_type:
             if f_type == 'infant':
@@ -156,30 +167,33 @@ def process_form():
                 f_type = 'SCHOOL AGE DAY CARE CENTER'
             fquery = fquery.filter(Facility.f_type == f_type)
 
-        facilities = fquery.all() ### Conglomerate all applicable queries
-
-        facility_count = len(facilities)
-
-        facilities_dict = {}
+    facilities = fquery.all() ### Conglomerate all applicable queries
     
-        for facility in facilities:     
-            mapinfo = {
-                        "title": facility.name,
-                        "lat": facility.latitude, 
-                        "lng": facility.longitude,
-                        "status": facility.status,
-                        "citation_count": len(facility.citations),
-                        }
-### TODO - This area is taking a lot of time to load, consider whether to add count to db, or some other solution
-
-            facilities_dict[facility.f_id] = mapinfo
-        
-        return jsonify(facilities_dict)
+    # else:
+    #     facilities = Facility.query.all()
     
-    else:
+    ### TODO -- consider setting to user location, if no filter params given
 
+    facility_count = len(facilities)
+    start = time.time()
+    print(">>>>>> PROCESSING INTO JSON: ", facility_count)
+    
+    facilities_dict = {"count": facility_count}
 
-        return jsonify({}) 
+    for facility in facilities:     
+        mapinfo = {
+                    "title": facility.name,
+                    "lat": facility.latitude, 
+                    "lng": facility.longitude,
+                    "status": facility.status,
+                    "citation_count": len(facility.citations),
+                    } ### TODO - ^This area is taking a lot of time to load, consider whether to add count to db, or some other solution
+        facilities_dict[facility.f_id] = mapinfo
+    
+    end = time.time()
+    print(end, "Time elapsed: ", end - start)
+    
+    return jsonify(facilities_dict)
 
 
 ##### For Geocoding ##########################################################

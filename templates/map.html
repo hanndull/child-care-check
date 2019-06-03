@@ -40,6 +40,9 @@
               <input id='zipcode' type='text' name='zipcode' placeholder='ex: 93636' size=5 pattern="[0-9]*"><br>
               <!-- Pattern attr from https://css-tricks.com/html-for-zip-codes/ -->
               
+              <label for='city'>Facility City </label>
+              <input id='city' type='text' name='city' placeholder='ex: San Francisco'><br>
+
               <label for='min-cit'>Minimum Citation Count </label>
               <input id='min-cit' type='number' name='min_cit' placeholder='ex: 2'><br>
               
@@ -91,6 +94,8 @@
         zoom: 6
       });
 
+      console.log("Map complete, now creating icons")
+
       const iconNoCitations = {
         // variable to store custom icon info
         url: 'https://image.flaticon.com/icons/svg/149/149983.svg',
@@ -102,55 +107,76 @@
         scaledSize: new google.maps.Size(20, 30)
       }
 
+      console.log("Icons complete, now fetching data from form")
+
       const formData = $("#filter-form").serialize()
       // Store all input from form fields in variable 
 
-      $.get('/filter-results.json', formData, (data) => {
-        // Ajax call for JSON of query, using formData (form field info)
- 
-        for (const f_id in data) {
-          // success callback function to create marker and window for ea facility
+      console.log("Form fetch complete, now processing data")
+       
+      let counter = 0; // counter to ask for specific "page" of query results
 
-          const content = (
-            '<div id="content"'+
-            '<h3>'+
-            data[f_id]['title']+
-            '</h3>'+
-            '<h3>Citation Count:'+
-            data[f_id]['citation_count']+
-            '</h3>'+
-            '<p><a href="/facilities/'+ 
-            f_id+ 
-            '" target="_blank">Facility Page</a></p>'+
-            '</div>'
-            )
+      while (true) {
+        // While loop for pagination
 
-          const infowindow = new google.maps.InfoWindow({
-            content: content,
-            maxWidth: 400
+        formData.page_num = counter;
+        $.get('/filter-results.json', formData, (data) => {
+          // Ajax call for JSON of query, using formData (form field info)
+          
+          for (const f_id in data) {
+            // success callback function to create marker and window for ea facility
+            
+            console.log("Now within for loop for marker and window creation")
+
+            if (data[f_id]['citation_count'] > 0) {
+              icon = iconCitations;
+            } else {
+              icon = iconNoCitations;
+            }
+
+            const marker = new google.maps.Marker({ 
+              icon: icon,
+              map: map,
+              position: {
+                lat: parseFloat(data[f_id]['lat']),
+                lng: parseFloat(data[f_id]['lng'])
+              },
+              title: data[f_id]['title'],
             });
+            
+            marker.addListener('click', () => {
+              const content = (
+                '<div id="content">'+
+                '<h3>'+
+                data[f_id]['title']+
+                '</h3><p>Status: '+
+                data[f_id]['status']+
+                '<br>Citation Count: '+
+                data[f_id]['citation_count']+
+                '<br><a href="/facilities/'+ 
+                f_id+ 
+                '" target="_blank">Learn More About This Facility</a></p>'+
+                '</div>'
+                )
 
-          if (data[f_id]['citation_count'] > 0) {
-            icon = iconCitations;
-          } else {
-            icon = iconNoCitations;
+              const infowindow = new google.maps.InfoWindow({
+                content: content,
+                maxWidth: 400
+              });
+              infowindow.open(map, marker)
+            });
           }
 
-          const marker = new google.maps.Marker({ 
-            icon: icon,
-            map: map,
-            position: {
-              lat: parseFloat(data[f_id]['lat']),
-              lng: parseFloat(data[f_id]['lng'])
-            },
-            title: data[f_id]['title'],
-          });
+          if (parseInt(data.count) < 100) {
+            //does this need to be turned into int, or is it already int?
+            return;
+          }
           
-          marker.addListener('click', () => {
-            infowindow.open(map, marker)
-          });
-        }
-      })
+          console.log("Now exited for loop");
+          
+          counter += 1;
+        });
+      }
     }
 
 

@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h3>CA Child Care Center Facility Profile</h3>
-
 <h2>{{ facility.name }}</h2>
+<h4>
+    {{ facility.address }}, {{ facility.city }}, {{ facility.state }} {{ facility.f_zip }}<br>
+    Licensing Status: {{ facility.status }} | Capacity: {{ facility.capacity }} children
+</h4>
 <p><a href={{ f_url }} target="_blank">Learn More About This Facility on the 
 CA Dept of Social Services Website</a></p>
-<h4>Lisencing Status: {{ facility.status }} | Capacity: {{ facility.capacity }} children</h4>
 
 
 <h3>Visitations and Inspections --</h3>
@@ -16,7 +17,7 @@ CA Dept of Social Services Website</a></p>
         <!-- sorted lists using: https://stackoverflow.com/a/39051279 -->
 
             <li>
-                <b>Visit Date:</b> {{ visit.date.strftime('%Y-%m-%d') }}; 
+                <b>{{ visit.date.strftime('%Y-%m-%d') }}:</b> 
                 <b>Was is an inspection?</b> 
                     {% if visit.is_inspection == 'true' %}
                         yes
@@ -57,7 +58,7 @@ CA Dept of Social Services Website</a></p>
 
 
 
-<h3><a href="/facilities">Return to All Facilities</a> | 
-    <a href="/filter">Return to Filters</a></h3>
+<h3><a href="/facilities">View List of All Facilities</a> | 
+    <a href="/map">View Map and Filters</a></h3>
 
 {% endblock %}
