@@ -22,7 +22,6 @@ app.secret_key = "Hannah"
 # Raise an error for an undefined variable in Jinja
 app.jinja_env.undefined = StrictUndefined
 
-
 ##### Define Routes ##########################################################
 
 @app.route('/')
@@ -95,6 +94,8 @@ def create_map_json():
 def process_form():
     """Recieve and store filtration input into JSON"""
 
+    print(">>>>>>> At top of process_form function")
+
     name = request.args.get('name')
     zipcode = request.args.get('zipcode')
     city = request.args.get('city')
@@ -106,13 +107,22 @@ def process_form():
     page_num = request.args.get('page_num') ### For use in pagination
 
     ### TODO - Citation date and counts may not be working together
-
-
+    print (">>>>>> Completed request.args")
+    print(name)
+    
     fquery = Facility.query.options(db.joinedload('citations')) ### Base query
 
-    fquery = fquery.offset(100 * page_num).limit(100)
+    if not page_num:
+        page_num = 1
+    
+    fquery = fquery.limit(100)
+    page_num = int(page_num)
+
+    if page_num > 1:
+        fquery = fquery.offset(100 * (page_num - 1))
         ### Add offset and limit to keep ea query to ~100
         ### Logic for pagination so front end can request specific "page"
+            
 
     if name or zipcode or city or min_cit or max_cit or status or suppress_date or f_type:
 
@@ -264,5 +274,5 @@ if __name__ == "__main__":
 
     # enables use of DebugToolbar
     DebugToolbarExtension(app)
-
+    # import pdb; pdb.set_trace()
     app.run(port=5000, host='0.0.0.0')

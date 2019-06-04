@@ -114,12 +114,14 @@
 
       console.log("Form fetch complete, now processing data")
        
-      let counter = 0; // counter to ask for specific "page" of query results
+      let counter = 1; // counter to ask for specific "page" of query results
 
       while (true) {
         // While loop for pagination
 
         formData.page_num = counter;
+        console.log(formData)
+        // formData.
         $.get('/filter-results.json', formData, (data) => {
           // Ajax call for JSON of query, using formData (form field info)
           
@@ -175,6 +177,7 @@
           console.log("Now exited for loop");
           
           counter += 1;
+          break;
         });
       }
     }
