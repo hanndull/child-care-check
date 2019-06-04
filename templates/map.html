@@ -120,7 +120,7 @@
         // While loop for pagination
 
         formData.page_num = counter;
-        console.log(formData)
+        console.log(">>>>> formData", formData)
         // formData.
         $.get('/filter-results.json', formData, (data) => {
           // Ajax call for JSON of query, using formData (form field info)
@@ -169,7 +169,7 @@
             });
           }
 
-          if (parseInt(data.count) < 100) {
+          if (data[count] < 100) {
             //does this need to be turned into int, or is it already int?
             return;
           }
@@ -177,7 +177,7 @@
           console.log("Now exited for loop");
           
           counter += 1;
-          break;
+          // break;
         });
       }
     }
