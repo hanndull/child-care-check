@@ -18,7 +18,7 @@ class Facility(db.Model):
     address = db.Column(db.String, nullable=False) 
     city = db.Column(db.String, nullable=False)
     state = db.Column(db.String, nullable=False)
-    f_zip = db.Column(db.Integer, nullable=False) #TODO - change to int once data is cleaned
+    f_zip = db.Column(db.Integer, nullable=False) 
     county = db.Column(db.String, nullable=True)
     capacity = db.Column(db.String, nullable=False) #TODO - change back to int
     no_complaints = db.Column(db.String,nullable=False) #TO DO - update this field
@@ -89,8 +89,8 @@ class Citation(db.Model):
     ### DB Relationships ###
     visitations = db.relationship('Visitation', backref='citations')
     cit_definitions = db.relationship('CitationDefinition', backref='citations')
-    facilities = db.relationship('Facility', backref='citations')
-
+    facilities = db.relationship('Facility', backref='citations', lazy='joined')
+        ### ADDED IN: "lazy='joined', 6/5"
 
     def __repr__(self):
         """Info about citation"""

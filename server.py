@@ -9,9 +9,10 @@ from flask import Flask, render_template, redirect, request, flash, session, jso
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, Facility, Visitation, Citation, CitationDefinition
 from sqlalchemy import func, distinct
-from dateutil.parser import *
+from dateutil.parser import isoparse
 import requests
 import time
+import json
 
 ##### Create App #############################################################
 
@@ -67,27 +68,60 @@ def show_map():
 
     return render_template('map.html')
 
+@app.route('/pass-json.json')
+def pass_json_to_js():
+    """Read local JSON file and pass to route"""
+    with open('data.txt') as file:  
+        data = file.read()
+        print ('>>>>>>>>> Now returning data')
+        return data
+
 
 @app.route('/mapping-facilities.json')
 def create_map_json():
-    """Create json for base map out of facilities query"""
+    """Create json for base map out of facilities query.
+    For quicker loading of initial map fn that is called when user loads 
+    /map route. Includes color label for use in creation of map markers.
+    """
 
-    facilities_list = Facility.query.filter(Facility.longitude != None, Facility.status == 'LICENSED').all() 
+    facilities_list = Facility.query.all() 
 
     facilities = {}
-    
+
     for facility in facilities_list:     
+        citation_count = len(facility.citations)
+
+        if citation_count == 0:
+            fill_color = "DarkGreen"
+            #"zero"
+
+        elif citation_count > 6:
+            fill_color = "Crimson"    
+            # "sevenAndMore"
+
+        elif citation_count > 2 and citation_count < 7:
+            fill_color = "OrangeRed"
+            # "threeToSix"
+
+        else:
+            fill_color = "Gold"
+            # "oneOrTwo"
+
         mapinfo = {
                     "title": facility.name,
                     "lat": facility.latitude, 
                     "lng": facility.longitude,
                     "status": facility.status,
-                    "citation_count": len(facility.citations),
+                    "citation_count": citation_count,
+                    "fillColor": fill_color,
                     }
-### TODO - This area is taking a lot of time to load, consider whether to add count to db, or some other solution
-        facilities[facility.f_id] = mapinfo
+
+        facilities[str(facility.f_id)] = mapinfo
+
+    with open('data.txt', 'w') as outfile:  
+        json.dump(facilities, outfile)
     
-    return jsonify(facilities)
+    return "woohoo"
 
 
 @app.route('/filter-results.json')
@@ -107,22 +141,14 @@ def process_form():
     page_num = request.args.get('page_num') ### For use in pagination
 
     ### TODO - Citation date and counts may not be working together
+
     print (">>>>>> Completed request.args")
     print(name)
     
-    fquery = Facility.query.options(db.joinedload('citations')) ### Base query
+    fquery = Facility.query #.options(db.joinedload('citations')) ### Base query
 
-    if not page_num:
-        page_num = 1
-    
-    fquery = fquery.limit(100)
-    page_num = int(page_num)
-
-    if page_num > 1:
-        fquery = fquery.offset(100 * (page_num - 1))
-        ### Add offset and limit to keep ea query to ~100
-        ### Logic for pagination so front end can request specific "page"
-            
+    # if not page_num:
+    #     page_num = 1
 
     if name or zipcode or city or min_cit or max_cit or status or suppress_date or f_type:
 
@@ -177,16 +203,29 @@ def process_form():
                 f_type = 'SCHOOL AGE DAY CARE CENTER'
             fquery = fquery.filter(Facility.f_type == f_type)
 
-    facilities = fquery.all() ### Conglomerate all applicable queries
     
-    # else:
-    #     facilities = Facility.query.all()
+    testquery = fquery ### To show total num markers that should be produced
+
+    fquery = fquery.limit(100)
+    page_num = int(page_num)
+
+    if page_num > 1:
+        fquery = fquery.offset(100 * (page_num - 1))
+        ### Add offset and limit to keep ea query to ~100
+        ### Logic for pagination so front end can request specific "page"
+
+    facilities = fquery.all() ### Conglomerate all applicable queries
+    testquery = testquery.all()
+    testquery_count = len(testquery)
     
     ### TODO -- consider setting to user location, if no filter params given
 
     facility_count = len(facilities)
+    
+    print("~~~~~~~~ TOTAL FOR OVERALL QUERY:", testquery_count)
     start = time.time()
-    print(">>>>>> PROCESSING INTO JSON: ", facility_count)
+    print(">>>>>> CURRENTLY PROCESSING INTO JSON: ", facility_count)
+
     
     facilities_dict = {"count": facility_count}
 
@@ -197,8 +236,9 @@ def process_form():
                     "lng": facility.longitude,
                     "status": facility.status,
                     "citation_count": len(facility.citations),
-                    } ### TODO - ^This area is taking a lot of time to load, consider whether to add count to db, or some other solution
-        facilities_dict[facility.f_id] = mapinfo
+                    }
+        facilities_dict[str(facility.f_id)] = mapinfo 
+        ### need to stringify for comparison of f_id to "count"
     
     end = time.time()
     print(end, "Time elapsed: ", end - start)

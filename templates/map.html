@@ -20,6 +20,11 @@
       margin: 10px;
     }
 
+    #loading {
+      text-align: center;
+      display: none;
+    }
+
   </style>
 
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -68,13 +73,22 @@
                       <option value="closed">Closed</option>
               </select><br>     
               
-              <label for="suppress-recent">Show only facilities who have not have a citation since </label> 
+              <label for="suppress-recent">Show only facilities who have not had a citation since </label> 
               <input id="suppress-recent" type='date' name='suppress_date' min="2013-01-01"><br> 
               <input type='submit' value='Filter!'>
 
       </form><br>
   </div>
 
+  <div id="loading">
+    <h3>Now loading...</h3>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Loading_2.gif" 
+    alt="loading GIF" height="50" width="50">
+  </div>
+
+  <div id="filter-legend">
+
+  </div>
 
   <div id="map"></div>
 
@@ -82,62 +96,176 @@
 
     $("#filter-form").submit((event) => {
     // JQuery event listener for click on submit of form
+
       event.preventDefault();
       initFilteredMap();
     });
 
-    function initFilteredMap() {
-      // Recreates Google Map once user applies filters
-      // TODO - LOOK UP HOW TO AUTOZOOM
+
+    function initBaseMap() {
+      // Renders Google Map from saved JSON of all facilities
+
       const map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 37.8, lng: -120},
         zoom: 6
       });
 
-      console.log("Map complete, now creating icons")
+      console.log(">>>>>> Map complete, now creating icons");
 
-      const iconNoCitations = {
-        // variable to store custom icon info
-        url: 'https://image.flaticon.com/icons/svg/149/149983.svg',
-        scaledSize: new google.maps.Size(20, 30)
-      };
+      // Try HTML5 geolocation.
+      // from https://developers.google.com/maps/documentation/javascript/examples/map-geolocation
 
-      const iconCitations = {
-        url: 'https://image.flaticon.com/icons/svg/149/149059.svg',
-        scaledSize: new google.maps.Size(20, 30)
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition( (position) => {
+          
+          const pos = {lat: position.coords.latitude, lng: position.coords.longitude}
+          infoWindow = new google.maps.InfoWindow;     
+
+          infoWindow.setPosition(pos);
+          infoWindow.setContent("Here's your location.");
+          infoWindow.open(map);
+          
+          map.setCenter(pos);
+          map.setZoom(13);
+
+        }, function() {
+          handleLocationError(true, infoWindow, map.getCenter());
+        });
+      
+      } else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, infoWindow, map.getCenter());
       }
 
-      console.log("Icons complete, now fetching data from form")
+      // let iconBase = {
+      //   path: google.maps.SymbolPath.CIRCLE,
+      //   scale: 4,
+      //   fillOpacity: 0.9,
+      //   strokeColor: 'DimGray',
+      //   strokeWeight: 1,
+      // }
+      // ### ^^ Currently using default for faster loading
+
+      $.getJSON('/pass-json.json', (data) => { // Ajax call for JSON from file
+
+        for (const f_id in data) {
+
+          const citationCount = parseInt(data[f_id]['citation_count'])
+
+          // iconBase.fillColor = data[f_id]['fillColor'] 
+          // ### ^^ Currently using default for faster loading
+
+          const marker = new google.maps.Marker({ 
+              // icon: iconBase, // ### Currently using default for faster loading
+              map: map,
+              position: {
+                lat: parseFloat(data[f_id]['lat']),
+                lng: parseFloat(data[f_id]['lng'])
+              },
+              title: data[f_id]['title']
+            });
+
+          marker.addListener('click', () => {
+            const content = (
+              '<div id="content">'+
+              '<h3>'+
+              data[f_id]['title']+
+              '</h3><p>Status: '+
+              data[f_id]['status']+
+              '<br>Citation Count: '+
+              data[f_id]['citation_count']+
+              '<br><a href="/facilities/'+ 
+              f_id+ 
+              '" target="_blank">Learn More About This Facility</a></p>'+
+              '</div>'
+              )
+
+            const infowindow = new google.maps.InfoWindow({
+              content: content,
+              maxWidth: 400,
+              title: data[f_id]['title'],
+            });
+            infowindow.open(map, marker)
+          });
+        }
+        console.log(">>>>>> Now exited for loop");
+      });
+      console.log(">>>>>> Completed load")
+    }
+
+
+    function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+      infoWindow.setPosition(pos);
+      infoWindow.setContent(browserHasGeolocation ?
+                            'Error: The Geolocation service failed.' :
+                            'Error: Your browser doesn\'t support geolocation.');
+      infoWindow.open(map);
+    }
+
+
+    function initFilteredMap() {
+      // Recreates Google Map once user applies filters
+
+      $("#loading").css("display", "block");
+      // JQuery to show loading when filtered map begins to load
+
+      const map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 37.8, lng: -120},
+        zoom: 6
+      });
+
+      console.log("Map complete, now creating base icon");
+
+      let iconBase = {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 4,
+        fillOpacity: 0.9,
+        strokeColor: 'DimGray',
+        strokeWeight: 1,
+      }
+
+      console.log("Icon complete, now fetching data from form")
 
       const formData = $("#filter-form").serialize()
-      // Store all input from form fields in variable 
+      // Store all input from form fields in a string 
 
       console.log("Form fetch complete, now processing data")
-       
-      let counter = 1; // counter to ask for specific "page" of query results
 
-      while (true) {
-        // While loop for pagination
+      function getPage(counter = 1) {
+        // function to help with pagination
+        
+        console.log(counter);
+        
+        console.log(">>>>> formData", `${formData}&page_num=${counter}`);
 
-        formData.page_num = counter;
-        console.log(">>>>> formData", formData)
-        // formData.
-        $.get('/filter-results.json', formData, (data) => {
+        $.get('/filter-results.json', `${formData}&page_num=${counter}`, (data) => {
           // Ajax call for JSON of query, using formData (form field info)
+
+          if (data.count === 0) {
+            $("#loading").css("display", "none");
+            // JQuery to remove loading GIF once finished for loop
+            return; 
+            // To exit function when no further query responses from server
+          }
           
           for (const f_id in data) {
             // success callback function to create marker and window for ea facility
             
-            console.log("Now within for loop for marker and window creation")
+            console.log("Now within for loop for marker and window creation");
 
-            if (data[f_id]['citation_count'] > 0) {
-              icon = iconCitations;
+            if (data[f_id]['citation_count'] === 0) {
+              //icon = iconCitations;
+              iconBase.fillColor = 'DarkGreen';
+            } else if (data[f_id]['citation_count'] > 6) {
+              iconBase.fillColor = 'Crimson';
+            } else if (data[f_id]['citation_count'] > 2 && data[f_id]['citation_count'] < 7) {
+              iconBase.fillColor = 'OrangeRed';
             } else {
-              icon = iconNoCitations;
+              iconBase.fillColor = 'Gold';
             }
 
             const marker = new google.maps.Marker({ 
-              icon: icon,
+              icon: iconBase,
               map: map,
               position: {
                 lat: parseFloat(data[f_id]['lat']),
@@ -169,81 +297,20 @@
             });
           }
 
-          if (data[count] < 100) {
-            //does this need to be turned into int, or is it already int?
-            return;
-          }
-          
           console.log("Now exited for loop");
           
-          counter += 1;
-          // break;
+          getPage(counter + 1);
+
         });
       }
+      getPage(); // Call the overall function to initiate loading of map markers
     }
-
-
-    // function initMapBase() {
-    //   // Creates map that will show up when user opens page
-    //   const map = new google.maps.Map(document.getElementById('map'), {
-    //     center: {lat: 37.8, lng: -120},
-    //     zoom: 6
-    //   });
-
-    //   const icon = {
-    //     url: 'https://svgsilh.com/svg_v2/1093167.svg',
-    //     scaledSize: new google.maps.Size(15, 15)
-    //   };
-
-    //   const infowindow = new google.maps.InfoWindow({
-    //     content: '<p>Test Window</p>'
-    //   });
-
-    //   $.get('/filter-results.json', (data) => {
-
-    //     for (const f_id in data) {
-          
-    //       const content = (
-    //         '<div id="content"'+
-    //         '<h1>'+
-    //         data[f_id]['title']+
-    //         '</h1>'+
-    //         '<p><a href="/facilities/'+ 
-    //         f_id+ 
-    //         '" target="_blank">Facility Page</a></p>'+
-    //         '<h3>Citation Count:'+
-    //         data[f_id]['citation_count']+
-    //         '</h3>'+
-    //         '</div>'
-    //         )
-
-    //       const infowindow = new google.maps.InfoWindow({
-    //         content: content,
-    //         maxWidth: 400
-    //         });
-
-    //       const marker = new google.maps.Marker({ 
-    //         icon: icon,
-    //         map: map,
-    //         position: {
-    //           lat: parseFloat(data[f_id]['lat']),
-    //           lng: parseFloat(data[f_id]['lng'])
-    //         },
-    //         title: data[f_id]['title'],
-    //       });
-          
-    //       marker.addListener('click', () => {
-    //         infowindow.open(map, marker)
-    //       });
-    //     }
-    //   });
-    // }
 
 
   </script>
 
   <script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U&callback=initFilteredMap">
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U&callback=initBaseMap">
   </script>
   
 {% endblock %}
