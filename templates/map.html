@@ -20,6 +20,10 @@
       margin: 10px;
     }
 
+    #filter-legend {
+      display: none;
+    }
+
     #loading {
       text-align: center;
       display: none;
@@ -87,7 +91,20 @@
   </div>
 
   <div id="filter-legend">
-
+    <p>
+      <img src="static/green-marker.PNG" 
+      alt="green map marker" height="40" width="40">
+       = 0 citations
+      <img src="static/yellow-marker.PNG" 
+      alt="yellow map marker" height="40" width="40">
+       = 1-2 citations
+      <img src="static/orange-marker.PNG" 
+      alt="orange map marker" height="40" width="40">
+       = 3-6 citations 
+      <img src="static/red-marker.PNG" 
+      alt="red map marker" height="40" width="40">
+       = 7+ citations 
+    </p>
   </div>
 
   <div id="map"></div>
@@ -208,21 +225,13 @@
 
       $("#loading").css("display", "block");
       // JQuery to show loading when filtered map begins to load
+      $("#filter-legend").css("display", "block");
+      // JQuery to show legend when filter form clicked
 
       const map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 37.8, lng: -120},
         zoom: 6
       });
-
-      console.log("Map complete, now creating base icon");
-
-      let iconBase = {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 4,
-        fillOpacity: 0.9,
-        strokeColor: 'DimGray',
-        strokeWeight: 1,
-      }
 
       console.log("Icon complete, now fetching data from form")
 
@@ -247,25 +256,31 @@
             return; 
             // To exit function when no further query responses from server
           }
-          
+          let image = 'static/green-marker.PNG';
+
           for (const f_id in data) {
             // success callback function to create marker and window for ea facility
             
             console.log("Now within for loop for marker and window creation");
 
             if (data[f_id]['citation_count'] === 0) {
+              image = 'static/green-marker.PNG';
               //icon = iconCitations;
-              iconBase.fillColor = 'DarkGreen';
+              // iconBase.fillColor = 'DarkGreen';
             } else if (data[f_id]['citation_count'] > 6) {
-              iconBase.fillColor = 'Crimson';
+              image = 'static/red-marker.PNG';
+              // iconBase.fillColor = 'Crimson';
             } else if (data[f_id]['citation_count'] > 2 && data[f_id]['citation_count'] < 7) {
-              iconBase.fillColor = 'OrangeRed';
+              image = 'static/orange-marker.PNG';
+              // iconBase.fillColor = 'OrangeRed';
             } else {
-              iconBase.fillColor = 'Gold';
+              image = 'static/yellow-marker.PNG';
+              // iconBase.fillColor = 'Gold';
             }
 
             const marker = new google.maps.Marker({ 
-              icon: iconBase,
+              icon: {url: image,
+                scaledSize: new google.maps.Size(40, 40)},
               map: map,
               position: {
                 lat: parseFloat(data[f_id]['lat']),
