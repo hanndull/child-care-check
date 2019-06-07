@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.1/Chart.js"></script>
+{% endblock %}
+
+{% block content %}
+    <h1>Common Citations in CA Child Care Center Facilities</h1>
+
+        {% for definition in cit_defs %}
+            <p><a href="/citations/{{ definition.cd_id }}">
+                {{ definition.code }}
+            </a></p>
+        {% endfor %}
+
+<!-- CHART JS PIE CHART 
+    doughnut chart w/ count of citation codes from db -- need to feed in from db query on server
+-->
+    <div class="citation-chart">
+        <canvas id="all-citations"></canvas>
+        <div id="donut-legend" class="chart-legend"></div>
+    </div>
+
+<script>
+
+    const options = {
+      responsive: true
+    };
+
+    // Make Donut Chart of percent of different types of citations
+    let ctx_donut = $("#donutChart").get(0).getContext("2d");
+
+    $.get("/citation-types.json", (data) => {
+        let myDonutChart = new Chart(ctx_donut, {
+                                              type: 'doughnut',
+                                              data: data,
+                                              options: options
+                                            });
+        $('#donut-legend').html(myDonutChart.generateLegend());
+    });
+
+</script>
+
+
+{% endblock %}

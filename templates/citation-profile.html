@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <h2>{{ citation_def.code }}</h2>
+    <p>{{ citation_def.description }}</p>
+
+    <p><a href="{{ cd_url }}" target="_blank">
+    View the associated PDF with the state's licensing requirements here.</a></p>
+
+
+    <!-- doughnut chart w/ portion for this particular code's chunk highlighted -->
+
+    <!-- iframe/canvas with viewable PDF of citation def source -->
+{% endblock %}

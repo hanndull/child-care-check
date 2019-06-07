@@ -48,6 +48,38 @@ def show_facilities():
     return render_template('facilities.html', facilities=facilities)
 
 
+@app.route('/citations')
+def show_citation_defs():
+    """Page of citation definitions"""
+
+    cit_defs = CitationDefinition.query.order_by(CitationDefinition.code).all()
+
+    return render_template('common-citations.html', cit_defs=cit_defs)
+
+@app.route('/citation-types.json')
+def send_json_to_chart():
+    """Queries citation code count for donut chart"""
+
+    sql =   """
+            SELECT COUNT(c_id), code 
+            FROM citations 
+            WHERE code 
+            IS NOT null 
+            GROUP BY code 
+            ORDER BY COUNT;
+            """
+    cursor = db.session.execute(sql)
+    code_counts = cursor.fetchall()
+
+    count_dict = {"labels": [], "data": [],}
+
+    for code_count in code_counts:
+        count_dict["data"] += [str(code_count.count)]
+        count_dict["labels"] += [code_count.code]
+
+    return jsonify(count_dict)
+
+
 @app.route('/facilities/<f_id>')
 def show_facility_details(f_id):
     """Facility details info page"""
@@ -59,6 +91,17 @@ def show_facility_details(f_id):
     return render_template('/facility_profile.html', facility=facility, f_url=f_url)
 
 
+@app.route('/citations/<cd_id>')
+def show_citation_details(cd_id):
+    """Citation Definition info on page"""
+
+    citation_def = CitationDefinition.query.filter_by(cd_id=cd_id).one()
+
+    cd_url = citation_def.url
+
+    return render_template('/citation-profile.html', citation_def=citation_def, cd_url=cd_url)
+
+
 @app.route('/map')
 def show_map():
     """Return page with facilities plotted to map
@@ -68,14 +111,174 @@ def show_map():
 
     return render_template('map.html')
 
+
 @app.route('/pass-json.json')
 def pass_json_to_js():
-    """Read local JSON file and pass to route"""
+    """Read local JSON file and pass to map"""
+
     with open('data.txt') as file:  
         data = file.read()
         print ('>>>>>>>>> Now returning data')
+        
         return data
 
+@app.route('/get-filter-geocode.json', methods=['GET'])
+def retrieve_filter_coords():
+    """Request geocoded coords of city or zipcode input by user
+    For use in centering filtered map on searched location
+    """
+    city = request.args.get('city')
+    zipcode = request.args.get('zipcode')
+
+    if city and zipcode:
+        url_insert = (f"{city}+CA+{zipcode}")
+    elif city:
+        url_insert = (f"{city}+CA")
+    else:
+        url_insert = (f"CA+{zipcode}")
+
+    geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={url_insert}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
+    results = requests.get(geocode_url)
+    results = results.json()
+
+    if len(results['results']) != 0:
+        answer = results['results'][0]
+        
+        lat = answer.get('geometry').get('location').get('lat')
+        lng = answer.get('geometry').get('location').get('lng')
+
+        print('>>>>>>>>>>>>>', lat, lng)
+
+        return jsonify({"lat": lat, "lng": lng})
+
+    else:
+        return 
+
+
+@app.route('/filter-results.json')
+def process_form():
+    """Recieve and store filtration input into JSON"""
+
+    print(">>>>>>> At top of process_form function")
+
+    name = request.args.get('name')
+    zipcode = request.args.get('zipcode')
+    city = request.args.get('city')
+    min_cit = request.args.get('min_cit')
+    max_cit = request.args.get('max_cit')
+    status = request.args.get('status')
+    suppress_date = request.args.get('suppress_date')
+    f_type = request.args.get('type')
+    page_num = request.args.get('page_num') ### For use in pagination
+
+    print (">>>>>> Completed request.args")
+    print(name)
+    
+    fquery = Facility.query #.options(db.joinedload('citations')) ### Base query
+
+
+    if name or zipcode or city or min_cit or max_cit or status or suppress_date or f_type:
+
+        if name:
+            name = name.upper()
+            fquery = fquery.filter(Facility.name.like(f'%{name}%')
+                )
+        
+        if zipcode:
+            fquery = fquery.filter(Facility.f_zip == int(zipcode))
+
+        if city:
+            city = city.upper()
+            fquery = fquery.filter(Facility.city.like(f'%{city}%')
+                )            
+
+        if min_cit:
+            ### Below query based off of https://stackoverflow.com/a/38639550
+            fquery = (fquery
+                .outerjoin(Facility.citations)
+                .group_by(Facility)
+                .having(func.count_(Facility.citations) >= min_cit)
+                )
+
+        if max_cit:
+            ### Below query based off of https://stackoverflow.com/a/38639550
+            fquery = (fquery
+                .outerjoin(Facility.citations)
+                .group_by(Facility)
+                .having(func.count_(Facility.citations) <= max_cit)
+                )
+
+        if suppress_date:
+            ### Show only facilities who have had 0 citations since input date
+            suppress_date = isoparse(suppress_date)
+
+            fquery = (fquery
+                .outerjoin(Facility.citations)
+                .group_by(Facility)
+                .having((func.max(Citation.date) <= suppress_date) | (func.count_(Facility.citations) == 0))
+                )
+        
+        if status:
+            status = status.upper()
+            if status == 'PROBATION':
+                status = 'ON PROBATION'
+            fquery = fquery.filter(Facility.status == status)
+
+        if f_type:
+            if f_type == 'infant':
+                f_type = 'INFANT CENTER'
+            elif f_type == 'ill':
+                f_type = 'DAY CARE CENTER - ILL CENTER'
+            elif f_type == 'prek':
+                f_type = 'DAY CARE CENTER'
+            elif f_type == 'school':
+                f_type = 'SCHOOL AGE DAY CARE CENTER'
+            fquery = fquery.filter(Facility.f_type == f_type)
+
+    
+    testquery = fquery ### To show total num markers that should be produced
+
+    fquery = fquery.limit(200)
+    page_num = int(page_num)
+
+    if page_num > 1:
+        fquery = fquery.offset(200 * (page_num - 1))
+        ### Add offset and limit to keep ea query to ~100
+        ### Logic for pagination so front end can request specific "page"
+
+    facilities = fquery.all() ### Conglomerate all applicable queries
+    testquery = testquery.all()
+    testquery_count = len(testquery)
+    
+    ### TODO -- consider setting to user location, if no filter params given
+
+    facility_count = len(facilities)
+    
+    print("~~~~~~~~ TOTAL FOR OVERALL QUERY:", testquery_count)
+    start = time.time()
+    print(">>>>>> CURRENTLY PROCESSING INTO JSON: ", facility_count)
+
+    
+    facilities_dict = {"count": facility_count}
+
+    for facility in facilities:     
+        mapinfo = {
+                    "title": facility.name,
+                    "lat": facility.latitude, 
+                    "lng": facility.longitude,
+                    "status": facility.status,
+                    "citation_count": len(facility.citations),
+                    }
+        facilities_dict[str(facility.f_id)] = mapinfo 
+        ### must stringify for comparison of f_id to "count"
+    
+    end = time.time()
+    print(end, "Time elapsed: ", end - start)
+    
+    return jsonify(facilities_dict)
+
+
+##### For Creating JSON for BaseMap ###########################################
 
 @app.route('/mapping-facilities.json')
 def create_map_json():
@@ -122,128 +325,6 @@ def create_map_json():
         json.dump(facilities, outfile)
     
     return "woohoo"
-
-
-@app.route('/filter-results.json')
-def process_form():
-    """Recieve and store filtration input into JSON"""
-
-    print(">>>>>>> At top of process_form function")
-
-    name = request.args.get('name')
-    zipcode = request.args.get('zipcode')
-    city = request.args.get('city')
-    min_cit = request.args.get('min_cit')
-    max_cit = request.args.get('max_cit')
-    status = request.args.get('status')
-    suppress_date = request.args.get('suppress_date')
-    f_type = request.args.get('type')
-    page_num = request.args.get('page_num') ### For use in pagination
-
-    ### TODO - Citation date and counts may not be working together
-
-    print (">>>>>> Completed request.args")
-    print(name)
-    
-    fquery = Facility.query #.options(db.joinedload('citations')) ### Base query
-
-    # if not page_num:
-    #     page_num = 1
-
-    if name or zipcode or city or min_cit or max_cit or status or suppress_date or f_type:
-
-        if name:
-            name = name.upper()
-            fquery = fquery.filter(Facility.name.like(f'%{name}%'))
-        
-        if zipcode:
-            fquery = fquery.filter(Facility.f_zip == int(zipcode))
-
-        if city:
-            city = city.upper()
-            fquery = fquery.filter(Facility.city.like(f'%{city}%'))            
-
-        if min_cit:
-            ### Below query based off of https://stackoverflow.com/a/38639550
-            fquery = (fquery
-                .outerjoin(Facility.citations)
-                .group_by(Facility)
-                .having(func.count_(Facility.citations) >= min_cit))
-
-        if max_cit:
-            ### Below query based off of https://stackoverflow.com/a/38639550
-            fquery = (fquery
-                .outerjoin(Facility.citations)
-                .group_by(Facility)
-                .having(func.count_(Facility.citations) <= max_cit))
-
-        if suppress_date:
-            ### Show only facilities who have had 0 citations since input date
-            suppress_date = isoparse(suppress_date)
-
-            fquery = (fquery
-                .join(Citation)
-                .group_by(Facility.f_id)
-                .having(func.max(Citation.date) <= suppress_date))
-        
-        if status:
-            status = status.upper()
-            if status == 'PROBATION':
-                status = 'ON PROBATION'
-            fquery = fquery.filter(Facility.status == status)
-
-        if f_type:
-            if f_type == 'infant':
-                f_type = 'INFANT CENTER'
-            elif f_type == 'ill':
-                f_type = 'DAY CARE CENTER - ILL CENTER'
-            elif f_type == 'prek':
-                f_type = 'DAY CARE CENTER'
-            elif f_type == 'school':
-                f_type = 'SCHOOL AGE DAY CARE CENTER'
-            fquery = fquery.filter(Facility.f_type == f_type)
-
-    
-    testquery = fquery ### To show total num markers that should be produced
-
-    fquery = fquery.limit(100)
-    page_num = int(page_num)
-
-    if page_num > 1:
-        fquery = fquery.offset(100 * (page_num - 1))
-        ### Add offset and limit to keep ea query to ~100
-        ### Logic for pagination so front end can request specific "page"
-
-    facilities = fquery.all() ### Conglomerate all applicable queries
-    testquery = testquery.all()
-    testquery_count = len(testquery)
-    
-    ### TODO -- consider setting to user location, if no filter params given
-
-    facility_count = len(facilities)
-    
-    print("~~~~~~~~ TOTAL FOR OVERALL QUERY:", testquery_count)
-    start = time.time()
-    print(">>>>>> CURRENTLY PROCESSING INTO JSON: ", facility_count)
-
-    
-    facilities_dict = {"count": facility_count}
-
-    for facility in facilities:     
-        mapinfo = {
-                    "title": facility.name,
-                    "lat": facility.latitude, 
-                    "lng": facility.longitude,
-                    "status": facility.status,
-                    "citation_count": len(facility.citations),
-                    }
-        facilities_dict[str(facility.f_id)] = mapinfo 
-        ### need to stringify for comparison of f_id to "count"
-    
-    end = time.time()
-    print(end, "Time elapsed: ", end - start)
-    
-    return jsonify(facilities_dict)
 
 
 ##### For Geocoding ##########################################################

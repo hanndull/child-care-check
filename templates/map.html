@@ -29,6 +29,10 @@
       display: none;
     }
 
+    #no-results {
+      display: none;
+    }
+
   </style>
 
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -53,10 +57,10 @@
               <input id='city' type='text' name='city' placeholder='ex: San Francisco'><br>
 
               <label for='min-cit'>Minimum Citation Count </label>
-              <input id='min-cit' type='number' name='min_cit' placeholder='ex: 2'><br>
+              <input id='min-cit' type='number' name='min_cit' min='0' placeholder='ex: 2'><br>
               
               <label for='max-cit'>Maximum Citation Count </label>
-              <input id='max-cit' type='number' name='max_cit' placeholder='ex: 6'><br>
+              <input id='max-cit' type='number' name='max_cit' min='0' placeholder='ex: 6'><br>
 
               <label for="type-select">Facility Type </label>
               <select id="type-select" name="type">
@@ -84,10 +88,16 @@
       </form><br>
   </div>
 
+  <div id="no-results">
+    <h3>Sorry, there are no results that match your search. Please try again.</h3>
+  </div>
+
   <div id="loading">
-    <h3>Now loading...</h3>
+    <h3>Now loading... This may take a few moments...</h3>
     <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Loading_2.gif" 
     alt="loading GIF" height="50" width="50">
+    <!-- stop query button -->
+    <button id="halt-loading" type="button">Stop loading facilities!</button>
   </div>
 
   <div id="filter-legend">
@@ -115,6 +125,9 @@
     // JQuery event listener for click on submit of form
 
       event.preventDefault();
+
+      $("#no-results").css("display", "none")
+
       initFilteredMap();
     });
 
@@ -131,7 +144,6 @@
 
       // Try HTML5 geolocation.
       // from https://developers.google.com/maps/documentation/javascript/examples/map-geolocation
-
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition( (position) => {
           
@@ -154,26 +166,30 @@
         handleLocationError(false, infoWindow, map.getCenter());
       }
 
-      // let iconBase = {
-      //   path: google.maps.SymbolPath.CIRCLE,
-      //   scale: 4,
-      //   fillOpacity: 0.9,
-      //   strokeColor: 'DimGray',
-      //   strokeWeight: 1,
-      // }
-      // ### ^^ Currently using default for faster loading
-
       $.getJSON('/pass-json.json', (data) => { // Ajax call for JSON from file
+
+        let image = 'static/green-marker.PNG';
 
         for (const f_id in data) {
 
           const citationCount = parseInt(data[f_id]['citation_count'])
 
-          // iconBase.fillColor = data[f_id]['fillColor'] 
-          // ### ^^ Currently using default for faster loading
+          if (data[f_id]['citation_count'] === 0) {
+              image = 'static/green-marker-sm.png';
+
+            } else if (data[f_id]['citation_count'] > 6) {
+              image = 'static/red-marker-sm.png';
+
+            } else if (data[f_id]['citation_count'] > 2 && data[f_id]['citation_count'] < 7) {
+              image = 'static/orange-marker-sm.png';
+
+            } else {
+              image = 'static/yellow-marker-sm.png';
+            }
 
           const marker = new google.maps.Marker({ 
-              // icon: iconBase, // ### Currently using default for faster loading
+              icon: {url: image,
+                scaledSize: new google.maps.Size(40, 40)},
               map: map,
               position: {
                 lat: parseFloat(data[f_id]['lat']),
@@ -225,6 +241,7 @@
 
       $("#loading").css("display", "block");
       // JQuery to show loading when filtered map begins to load
+      
       $("#filter-legend").css("display", "block");
       // JQuery to show legend when filter form clicked
 
@@ -250,12 +267,41 @@
         $.get('/filter-results.json', `${formData}&page_num=${counter}`, (data) => {
           // Ajax call for JSON of query, using formData (form field info)
 
+          $("#halt-loading").click((event) => {
+          // JQuery event listener for click on halt load button
+            return data.count = 0; // TODO - FIX THIS -- may need to hold in variable ??
+          });
+          
+          if (data.count === 0 && counter === 1) {
+            $("#no-results").css("display", "block");
+            // If no results, prompts user to try again
+          }
+
           if (data.count === 0) {
             $("#loading").css("display", "none");
             // JQuery to remove loading GIF once finished for loop
             return; 
             // To exit function when no further query responses from server
           }
+          
+          const city = $("#city").val();
+          const zipcode = $("#zipcode").val();
+          
+          if (city || zipcode){
+
+            $.get('/get-filter-geocode.json', formData, (data) => {
+              // Google Geocoding API call for city to get coordinates + zoom
+              
+              console.log("formData = ", formData);
+              console.log("data = ", data);
+            
+              const pos = {lat: data['lat'], lng: data['lng']};
+              
+              map.setCenter(pos);
+              map.setZoom(11);
+            });
+          }
+
           let image = 'static/green-marker.PNG';
 
           for (const f_id in data) {

@@ -47,7 +47,11 @@ CA Dept of Social Services Website</a></p>
             
             <li>
                 <b>{{ citation.date.strftime('%Y-%m-%d') }}:</b> 
-                {{ citation.code }}
+                    {% if citation.cd_id %}
+                        <a href="/citations/{{ citation.cd_id }}">{{ citation.code }}</a>
+                    {% else %}
+                        {{ citation.code }}
+                    {% endif %}
             </li>
 
         {% endfor %}
