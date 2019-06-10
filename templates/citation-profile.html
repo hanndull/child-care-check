@@ -4,6 +4,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="container-fluid">
     <h2>{{ citation_def.code }}</h2>
     <p>{{ citation_def.description }}</p>
 
@@ -11,7 +12,7 @@
     View the associated PDF with the state's licensing requirements here.</a></p>
 
 
-    <!-- doughnut chart w/ portion for this particular code's chunk highlighted -->
-
-    <!-- iframe/canvas with viewable PDF of citation def source -->
+    <h3><a href="/facilities">View List of All Facilities</a> | 
+    <a href="/map">View Map and Filters</a></h3>
+</div>
 {% endblock %}

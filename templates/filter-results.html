@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
 {% block content %}
   
-<div>
-{% if facilities %}
-    <h3>Your search returned: {{ facility_count }} facilities</h3>
-    
-    {% for facility in facilities %}
-        <p>
-            <a href="/facilities/{{ facility.f_id }}">
-            {{ facility.name }}</a>
-        </p>
-    {% endfor %}
-{% else %}
-    <p>No results were found from your search filters at this time.</p>
-    <p><a href="/filter">Return to filter</a></p>
+<div class="container-fluid">>
+    {% if facilities %}
+        <h3>Your search returned: {{ facility_count }} facilities</h3>
+        
+        {% for facility in facilities %}
+            <p>
+                <a href="/facilities/{{ facility.f_id }}">
+                {{ facility.name }}</a>
+            </p>
+        {% endfor %}
+    {% else %}
+        <p>No results were found from your search filters at this time.</p>
+        <p><a href="/filter">Return to filter</a></p>
 
-{% endif %}
+    {% endif %}
 </div>
 
 {% endblock %}

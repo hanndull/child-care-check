@@ -1,0 +1,8 @@
+env/
+*pyc*
+*.DS_Store*
+excel/
+notes.txt
+seed2.py
+geocode_fails.txt
+old-markers/

@@ -6,28 +6,63 @@
   {% block head %}
 
   {% endblock %}
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
+  <style>
+    .nav-link {
+      background-color: rgba(0,128,0,0.3);
+    }
+    #nav-bar {
+      background-color: rgba(0,0,60,1);
+    }
+  </style>
+
+  
+  <!-- LOOK INTO: inserting html from another file https://github.com/LexmarkWeb/csi.js -->
 </head>
 
-<body>
+  <body> 
+    <div id="nav-bar">
+      <ul class="nav nav-pills">
+        <li class="nav-item">
+          <a class="nav-link" href="/">CA Child Care Centers: Licensing Info</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/map">Map</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/facilities">Facilities</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/citations">Citations</a>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="container-fluid">  
+      <div class=flash-box>
+          <!--  Flash messages display here 
+            Note -- currently no use of flash -->
 
-<div class=flash-box>
-    <!--  Flash messages display here -->
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <span class=flashes>
-        {% for message in messages %}
-          <p>{{ message }}</p>
-        {% endfor %}
-        </span>
-      {% endif %}
-    {% endwith %}
-</div>
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <span class=flashes>
+              {% for message in messages %}
+                <p>{{ message }}</p>
+              {% endfor %}
+              </span>
+            {% endif %}
+          {% endwith %}
+      </div>
 
-<h3><a href="/">CA Child Care Centers: Licensing Info</a></h3>
-<hr>
+      <h3><a href="/">CA Child Care Centers: Licensing Info</a></h3>
+      <hr>
 
-{% block content %} fill in content here {% endblock %}
+    </div>
 
-</body>
+
+    {% block content %} fill in content here {% endblock %}
+
+    
+  </body>
 
 </html>

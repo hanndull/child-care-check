@@ -32,13 +32,6 @@ def show_home():
     return render_template('home.html')
 
 
-@app.route('/filter')
-def display_filter_form():
-    """Display filter fields of form"""
-
-    return render_template('filter.html')
-
-
 @app.route('/facilities')
 def show_facilities():
     """Facilities page"""
@@ -55,29 +48,6 @@ def show_citation_defs():
     cit_defs = CitationDefinition.query.order_by(CitationDefinition.code).all()
 
     return render_template('common-citations.html', cit_defs=cit_defs)
-
-@app.route('/citation-types.json')
-def send_json_to_chart():
-    """Queries citation code count for donut chart"""
-
-    sql =   """
-            SELECT COUNT(c_id), code 
-            FROM citations 
-            WHERE code 
-            IS NOT null 
-            GROUP BY code 
-            ORDER BY COUNT;
-            """
-    cursor = db.session.execute(sql)
-    code_counts = cursor.fetchall()
-
-    count_dict = {"labels": [], "data": [],}
-
-    for code_count in code_counts:
-        count_dict["data"] += [str(code_count.count)]
-        count_dict["labels"] += [code_count.code]
-
-    return jsonify(count_dict)
 
 
 @app.route('/facilities/<f_id>')
@@ -172,7 +142,6 @@ def process_form():
     page_num = request.args.get('page_num') ### For use in pagination
 
     print (">>>>>> Completed request.args")
-    print(name)
     
     fquery = Facility.query #.options(db.joinedload('citations')) ### Base query
 
