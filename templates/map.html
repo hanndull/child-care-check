@@ -32,13 +32,7 @@
 {% endblock %}
   
 {% block content %}
-  <div class="container alert alert-warning alert-dismissible fade show" role="alert">
-    <strong>Check Out CA's Centers!</strong><br>Use the filters below to narrow your search. <br>Each facility is color-coded by number of times it has violated California's licensing standards. 
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-
+<main>
 
   <div class="container-fluid">
     <div id="filters">
@@ -47,44 +41,44 @@
         <form id="filter-form">
           <!-- look into refactoring with Jinja -->
                 
-                <label for='name'>Facility Name </label>
-                <input id='name' type='text' name='name' placeholder='ex: City Kids'><br>
-                
-                <label for='zipcode'>Facility Zip Code </label>
-                <input id='zipcode' type='text' name='zipcode' placeholder='ex: 93636' size=5 pattern="[0-9]*"><br>
-                <!-- Pattern attr from https://css-tricks.com/html-for-zip-codes/ -->
-                
-                <label for='city'>Facility City </label>
-                <input id='city' type='text' name='city' placeholder='ex: San Francisco'><br>
+          <label for='name'>Facility Name </label>
+          <input id='name' type='text' name='name' placeholder='Center Name'><br>
+          
+          <label for='zipcode'>Facility Zip Code </label>
+          <input id='zipcode' type='text' name='zipcode' placeholder='94109' size=5 pattern="[0-9]*"><br>
+          <!-- Pattern attr from https://css-tricks.com/html-for-zip-codes/ -->
+          
+          <label for='city'>Facility City </label>
+          <input id='city' type='text' name='city' placeholder='San Francisco'><br>
 
-                <label for='min-cit'>Minimum Citation Count </label>
-                <input id='min-cit' type='number' name='min_cit' min='0' placeholder='ex: 2'><br>
-                
-                <label for='max-cit'>Maximum Citation Count </label>
-                <input id='max-cit' type='number' name='max_cit' min='0' placeholder='ex: 6'><br>
+          <label for='min-cit'>Minimum Citation Count </label>
+          <input id='min-cit' type='number' name='min_cit' min='0' placeholder='2'><br>
+          
+          <label for='max-cit'>Maximum Citation Count </label>
+          <input id='max-cit' type='number' name='max_cit' min='0' placeholder='6'><br>
 
-                <label for="type-select">Facility Type </label>
-                <select id="type-select" name="type">
-                        <option value="prek">Day Care Center - PreK</option>
-                        <option value="school">School Age Day Care Center</option>
-                        <option value="infant">Infant Center</option>
-                        <option value="ill">Day Care Center - Ill</option>
-                        <option value="">All Center Types</option>
-                </select><br>
-                
-                <label for="status-select">Facility Status </label>
-                <select id="status-select" name='status'>
-                        <option value="licensed">Licensed</option>
-                        <option value="pending">Pending</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="probation">On Probation</option>
-                        <option value="closed">Closed</option>
-                        <option value="">All Statuses</option> 
-                </select><br>     
-                
-                <label for="suppress-recent">Show only facilities who have not had a citation since </label> 
-                <input id="suppress-recent" type='date' name='suppress_date' min="2013-01-01"><br> 
-                <input type='submit' value='Search!' class='btn btn-outline'>
+          <label for="type-select">Facility Type </label>
+          <select id="type-select" name="type">
+                  <option value="prek">Day Care Center - PreK</option>
+                  <option value="school">School Age Day Care Center</option>
+                  <option value="infant">Infant Center</option>
+                  <option value="ill">Day Care Center - Ill</option>
+                  <option value="">All Center Types</option>
+          </select><br>
+          
+          <label for="status-select">Facility Status </label>
+          <select id="status-select" name='status'>
+                  <option value="licensed">Licensed</option>
+                  <option value="pending">Pending</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="probation">On Probation</option>
+                  <option value="closed">Closed</option>
+                  <option value="">All Statuses</option> 
+          </select><br>     
+          
+          <label for="suppress-recent">Show only facilities who have not had a citation since </label> 
+          <input id="suppress-recent" type='date' name='suppress_date' min="2013-01-01"><br> 
+          <input type='submit' value='Search!' class='btn btn-outline'>
 
         </form><br>
     </div>
@@ -124,12 +118,12 @@
       </div>
     </div>
   </div>
+</main>
 
 
   <div id="map"> <!-- Should the map div enclose the map script?? -->
 
     <script>
-      $(".alert").alert('close')
 
       $("#filter-form").submit((event) => {
       // JQuery event listener for click on submit of form
@@ -210,9 +204,9 @@
             marker.addListener('click', () => {
               const content = (
                 '<div id="content">'+
-                '<h3>'+
+                '<h4>'+
                 data[f_id]['title']+
-                '</h3><p>Status: '+
+                '</h4><p>Status: '+
                 data[f_id]['status']+
                 '<br>Citation Count: '+
                 data[f_id]['citation_count']+
@@ -224,7 +218,7 @@
 
               const infowindow = new google.maps.InfoWindow({
                 content: content,
-                maxWidth: 400,
+                maxWidth: 300,
                 title: data[f_id]['title'],
               });
               infowindow.open(map, marker)
@@ -336,9 +330,9 @@
               marker.addListener('click', () => {
                 const content = (
                   '<div id="content">'+
-                  '<h3>'+
+                  '<h4>'+
                   data[f_id]['title']+
-                  '</h3><p>Status: '+
+                  '</h4><p>Status: '+
                   data[f_id]['status']+
                   '<br>Citation Count: '+
                   data[f_id]['citation_count']+
@@ -350,7 +344,7 @@
 
                 const infowindow = new google.maps.InfoWindow({
                   content: content,
-                  maxWidth: 400
+                  maxWidth: 300
                 });
                 infowindow.open(map, marker)
               });

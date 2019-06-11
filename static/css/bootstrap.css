@@ -1,10 +1,13 @@
 /*    .nav-link {
         background-color: rgba(255,255,255,0.5);
     }*/
-.navbar {
+.nav-opaque {
     /*background: linear-gradient(to left, #f9d1d4, #d3cdec);*/
     /*background-color: rgba(255,255,255,0.7);*/
-    background-color: rgba(242,183,5,0.3)
+    background-color: rgba(252,234,179,1);
+}
+.nav-translucent {
+    background-color: rgba(242,183,5,0.3);
 }
 .navbar-brand { /* forest green -- navbar brand */
     color: rgba(3,166,90,1);
@@ -23,6 +26,12 @@ h3 {
 h4 {
     font-size: 16px;
 }
+main {
+    margin-top: 76px;
+}
+main.homepg {
+    margin-top: 56px
+}
 .nestedh2 {
     font-size: 25px;
     color: rgba(3,76,140,1);
@@ -32,6 +41,11 @@ h4 {
 }
 a { /* deep blue -- hyperlinks */
     color: rgba(3,76,140,1);
+}
+a:hover { 
+    color: rgba(210,84,152,1); 
+    text-decoration: none; 
+    font-weight: none;
 }
 .btn-outline {
     color: rgba(3,76,140,1);

@@ -4,18 +4,23 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<main>
+    <div class="container-fluid">
 
-    <h2>{{ citation_def.code }}</h2>
-    <p>{{ citation_def.description }}</p>
+        <h2>{{ citation_def.code }}</h2>
+        <p>{{ citation_def.description }}</p>
 
-    <p><a href="{{ cd_url }}" target="_blank">
-    View the PDF associated with this state licensing requirement</a></p>
-</div>
+        <p><a href="{{ cd_url }}" target="_blank">
+            View the PDF associated with this state licensing requirement
+        </a></p>
+    </div>
 
-<div class="container-fluid fixed-bottom"    
-    <h3><a href="/map">View Map of Facilities</a> | <a href="/facilities">View List of Facilities</a>
-    </h3>
+    <div class="container-fluid fixed-bottom"    
+        <h3>
+            <a href="/map">View Map of Facilities</a> | 
+            <a href="/facilities">View List of Facilities</a>
+        </h3>
 
-</div>
+    </div>
+</main>
 {% endblock %}

@@ -1,70 +1,73 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container-fluid">
-    <h2>{{ facility.name }}</h2>
-    <h4>
-        {{ facility.address }}, {{ facility.city }}, {{ facility.state }} {{ facility.f_zip }}<br>
-        Licensing Status: {{ facility.status }} | Capacity: {{ facility.capacity }} children
-    </h4>
-    <p><a href={{ f_url }} target="_blank">Learn More About This Facility on the 
-    CA Dept of Social Services Website</a></p>
+
+<main>
+    <div class="container-fluid">
+        <h2>{{ facility.name }}</h2>
+        <h4>
+            {{ facility.address }}, {{ facility.city }}, {{ facility.state }} {{ facility.f_zip }}<br>
+            Licensing Status: {{ facility.status }} | Capacity: {{ facility.capacity }} children
+        </h4>
+        <p><a href={{ f_url }} target="_blank">Learn More About This Facility on the 
+        CA Dept of Social Services Website</a></p>
 
 
-    <h3>Visitations and Inspections --</h3>
-        {% if facility.visitations %}
-            <ul>
-            {% for visit in facility.visitations|sort(attribute='date', reverse = True) %}
-            <!-- sorted lists using: https://stackoverflow.com/a/39051279 -->
+        <h3>Visitations and Inspections --</h3>
+            {% if facility.visitations %}
+                <ul>
+                {% for visit in facility.visitations|sort(attribute='date', reverse = True) %}
+                <!-- sorted lists using: https://stackoverflow.com/a/39051279 -->
 
-                <li>
-                    <b>{{ visit.date.strftime('%Y-%m-%d') }}:</b> 
-                    <b>Was is an inspection?</b> 
-                        {% if visit.is_inspection == 'true' %}
-                            yes
-                        {% else %}
-                            no
-                        {% endif %}
-                </li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>This facility has received no licensing visits or inspections.</p>
-        {% endif %}
-
-
-    <h3>Complaints --</h3>    
-        {% if facility.no_complaints %}
-            <p>This facility has received no complaints.</p>
-        {% else %}
-            <p>This facility has a history of complaints.</p>
-        {% endif %}
+                    <li>
+                        <b>{{ visit.date.strftime('%Y-%m-%d') }}:</b> 
+                        <b>Was is an inspection?</b> 
+                            {% if visit.is_inspection == 'true' %}
+                                yes
+                            {% else %}
+                                no
+                            {% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>This facility has received no licensing visits or inspections.</p>
+            {% endif %}
 
 
-    <h3>Citations --</h3>
-        {% if facility.citations %}
-            <ul>
-            {% for citation in facility.citations|sort(attribute='date', reverse = True) %}
-                
-                <li>
-                    <b>{{ citation.date.strftime('%Y-%m-%d') }}:</b> 
-                        {% if citation.cd_id %}
-                            <a href="/citations/{{ citation.cd_id }}">{{ citation.code }}</a>
-                        {% else %}
-                            {{ citation.code }}
-                        {% endif %}
-                </li>
-
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>This facility has received no licensing citations.</p>
-        {% endif %}
+        <h3>Complaints --</h3>    
+            {% if facility.no_complaints %}
+                <p>This facility has received no complaints.</p>
+            {% else %}
+                <p>This facility has a history of complaints.</p>
+            {% endif %}
 
 
+        <h3>Citations --</h3>
+            {% if facility.citations %}
+                <ul>
+                {% for citation in facility.citations|sort(attribute='date', reverse = True) %}
+                    
+                    <li>
+                        <b>{{ citation.date.strftime('%Y-%m-%d') }}:</b> 
+                            {% if citation.cd_id %}
+                                <a href="/citations/{{ citation.cd_id }}">{{ citation.code }}</a>
+                            {% else %}
+                                {{ citation.code }}
+                            {% endif %}
+                    </li>
 
-    <h3><a href="/facilities">View List of All Facilities</a> | 
-        <a href="/map">View Map and Filters</a></h3>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>This facility has received no licensing citations.</p>
+            {% endif %}
 
-</div>
+
+
+        <h3><a href="/facilities">View List of All Facilities</a> | 
+            <a href="/map">View Map and Filters</a></h3>
+
+    </div>
+</main>
 
 {% endblock %}

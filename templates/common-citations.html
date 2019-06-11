@@ -1,16 +1,18 @@
 {% extends 'base.html' %}
 
-{% block head %}
-{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <h1>Common Citations in CA Child Care Center Facilities</h1>
 
-        {% for definition in cit_defs %}
-            <p><a href="/citations/{{ definition.cd_id }}">
-                {{ definition.code }}
-            </a></p>
-        {% endfor %}
-</div>
+<main>
+    <div class="container-fluid">
+        <h1>Common Citations in CA Child Care Center Facilities</h1>
+
+            {% for definition in cit_defs %}
+                <p><a href="/citations/{{ definition.cd_id }}">
+                    {{ definition.code }}
+                </a></p>
+            {% endfor %}
+    </div>
+</main>
+
 {% endblock %}
