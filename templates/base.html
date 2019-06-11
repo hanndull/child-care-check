@@ -15,37 +15,52 @@
 </head>
 
   <body> 
-
-    <nav class="navbar navbar-expand-md fixed-top">
-      <a class="navbar-brand" href="/">CA Child Care Search</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-          <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-              <a class="nav-link" href="/">Home
-                <span class="sr-only">(current)</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/map">Map</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/facilities">Facilities</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/citations">Citations</a>
-            </li>
-          </ul>
-        </div>
-    </nav>
+    <div class="container-fluid position-relative">
+      <nav class="navbar navbar-expand-sm fixed-top">
+        <img src="https://cdn.pixabay.com/photo/2014/04/02/11/01/tick-305245_960_720.png" height="20" width="20">
+        <a class="navbar-brand" href="/">Child Care Check</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="/">Home
+                  <!-- <span class="sr-only">(current)</span> -->
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/map">Map</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/facilities">Facilities</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/citations">Citations</a>
+              </li>
+            </ul>
+          </div>
+      </nav>
+    </div>
 
 <!-- Need to fix the nav bar collapse -->
 
   {% block content %} fill in content here {% endblock %}
 
-    
+    <div class="container-fluid mt-3 fixed-bottom">
+      <div class="row align-items-center">
+        <div class="col blue">
+        </div>
+        <div class="col drk-grn">
+        </div>
+        <div class="col yellow">
+        </div>
+        <div class="col orange">
+        </div>
+        <div class="col blue">
+        </div>
+      </div>
+    </div>    
   </body>
 
 </html>

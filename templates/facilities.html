@@ -5,7 +5,7 @@
 
     <h1>CA Child Care Center Facilities</h1>
 
-    <h2>Note that this list does not include home-based facilities.</h2>
+    <h4>Number of Facilities: {{ num_facilities }} | Note that this list does not include home-based facilities.</h4>
         
         {% for facility in facilities %}
             <p><a href="/facilities/{{ facility.f_id }}">

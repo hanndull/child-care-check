@@ -8,20 +8,33 @@
 
 {% block content %}
 
-<div class="container-fluid position-relative">
-    <img src="/static/readinggroup.jpg" class="img-fluid" alt="Young children reading with a teacher" id="home-header">
-    <!-- Image from: https://www.actforchildren.org/wp-content/uploads/2015/09/Opening-CC-Program-PAGE-HEADER.jpg -->
-    <div class="bottom-left">
-<!--         <h1>Search For Quality CA Child Care Centers</h1> -->
-    </div>  
+<div class="position-relative">
+    <img src="/static/readinggroup.jpg" class="img-fluid" alt="Preschool-age children reading with a teacher" id="home-header">
+    <!-- Image from: https://www.actforchildren.org/wp-content/uploads/2015/09/Opening-CC-Program-PAGE-HEADER.jpg --> 
 </div>
 
-<div class="container-fluid position-relative">
-    <h1>Search For Quality CA Child Care Centers</h1>
-    <a class="btn btn-outline" href="/map" role="button">Search By Map</a>
-    <a class="btn btn-outline" href="/facilities" role="button">List of All Centers</a>
-    <a class="btn btn-outline" href="/citations" role="button">Common Licensing Issues</a>
+<div class="container-fluid position-relative mt-5 d-flex justify-content-center">
+    <div class="row">
+        <div class="col">
+            <div class="row">
+                <h1><img src="https://cdn.pixabay.com/photo/2014/04/02/11/01/tick-305245_960_720.png" height="25" width="25">Child Care Check<span class="nestedh2">: Search For Quality CA Child Care Centers</span></h1>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="container-fluid position-relative mt-5">
+    <div class="row justify-content-center">
+        <div class="col-3">
+            <a class="btn btn-grn btn-outline" href="/map" role="button">Search By Map</a>
+        </div>
+        <div class="col-3">
+            <a class="btn btn-yw btn-outline" href="/facilities" role="button">View All Centers</a>
+        </div>
+        <div class="col-3">
+            <a class="btn btn-orng btn-outline" href="/citations" role="button">Common Citations</a>
+        </div>
+    </div>
 </div>
 
 {% endblock %}

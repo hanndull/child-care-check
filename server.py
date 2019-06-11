@@ -37,8 +37,13 @@ def show_facilities():
     """Facilities page"""
 
     facilities = Facility.query.order_by(Facility.name).all()
+    num_facilities = len(facilities)
 
-    return render_template('facilities.html', facilities=facilities)
+    return render_template(
+                            'facilities.html', 
+                            facilities=facilities, 
+                            num_facilities=num_facilities
+                            )
 
 
 @app.route('/citations')

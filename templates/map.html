@@ -32,6 +32,14 @@
 {% endblock %}
   
 {% block content %}
+  <div class="container alert alert-warning alert-dismissible fade show" role="alert">
+    <strong>Check Out CA's Centers!</strong><br>Use the filters below to narrow your search. <br>Each facility is color-coded by number of times it has violated California's licensing standards. 
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+
   <div class="container-fluid">
     <div id="filters">
       <h2>Filter your results.</h2>
@@ -121,6 +129,7 @@
   <div id="map"> <!-- Should the map div enclose the map script?? -->
 
     <script>
+      $(".alert").alert('close')
 
       $("#filter-form").submit((event) => {
       // JQuery event listener for click on submit of form
