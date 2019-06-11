@@ -1,17 +1,26 @@
 {% extends 'base.html' %}
+
+{% block head %}
+<style>
+
+</style>
+{% endblock %}
+
 {% block content %}
 
-<img src="/static/readinggroup.jpg" class="img-responsive" alt="Young children reading with a teacher">
+<div class="container-fluid position-relative">
+    <img src="/static/readinggroup.jpg" class="img-fluid" alt="Young children reading with a teacher" id="home-header">
     <!-- Image from: https://www.actforchildren.org/wp-content/uploads/2015/09/Opening-CC-Program-PAGE-HEADER.jpg -->
+    <div class="bottom-left">
+<!--         <h1>Search For Quality CA Child Care Centers</h1> -->
+    </div>  
+</div>
 
-<div class="container-fluid">
-
+<div class="container-fluid position-relative">
     <h1>Search For Quality CA Child Care Centers</h1>
-
-    <h2>Queries</h2>
-        <p><a href="/map">View Map</a></p>
-        <p><a href="/facilities">View all facilities</a></p>
-        <p><a href="/citations">View common citations</a></p>
+    <a class="btn btn-outline" href="/map" role="button">Search By Map</a>
+    <a class="btn btn-outline" href="/facilities" role="button">List of All Centers</a>
+    <a class="btn btn-outline" href="/citations" role="button">Common Licensing Issues</a>
 
 </div>
 

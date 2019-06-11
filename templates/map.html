@@ -14,14 +14,7 @@
       height: 100%;
       margin: 0;
       padding: 0;
-    }
-
-    #filters {
-      margin: 10px;
-    }
-
-    #filter-legend {
-      display: none;
+      position: relative;
     }
 
     #loading {
@@ -64,26 +57,26 @@
 
                 <label for="type-select">Facility Type </label>
                 <select id="type-select" name="type">
-                        <option value="">--Choose an option--</option>
-                        <option value="infant">Infant Center</option>
-                        <option value="ill">Day Care Center - Ill</option>
                         <option value="prek">Day Care Center - PreK</option>
                         <option value="school">School Age Day Care Center</option>
+                        <option value="infant">Infant Center</option>
+                        <option value="ill">Day Care Center - Ill</option>
+                        <option value="">All Center Types</option>
                 </select><br>
                 
                 <label for="status-select">Facility Status </label>
                 <select id="status-select" name='status'>
-                        <option value="">--Choose an option--</option> 
                         <option value="licensed">Licensed</option>
                         <option value="pending">Pending</option>
                         <option value="inactive">Inactive</option>
                         <option value="probation">On Probation</option>
                         <option value="closed">Closed</option>
+                        <option value="">All Statuses</option> 
                 </select><br>     
                 
                 <label for="suppress-recent">Show only facilities who have not had a citation since </label> 
                 <input id="suppress-recent" type='date' name='suppress_date' min="2013-01-01"><br> 
-                <input type='submit' value='Filter!'>
+                <input type='submit' value='Search!' class='btn btn-outline'>
 
         </form><br>
     </div>
@@ -92,27 +85,35 @@
       <h3>Sorry, there are no results that match your search. Please try again.</h3>
     </div>
 
-    <div id="loading">
+    <div class="container-fluid mb-3" id="loading">
       <h3>Now loading... This may take a few moments...</h3>
       <img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Loading_2.gif" 
       alt="loading GIF" height="50" width="50">
     </div>
 
-    <div id="filter-legend">
-      <p>
-        <img src="static/green-marker-sm.png" 
-        alt="green map marker" height="40" width="40">
-         = 0 citations
-        <img src="static/yellow-marker-sm.png" 
-        alt="yellow map marker" height="40" width="40">
-         = 1-2 citations
-        <img src="static/orange-marker-sm.png" 
-        alt="orange map marker" height="40" width="40">
-         = 3-6 citations 
-        <img src="static/red-marker-sm.png" 
-        alt="red map marker" height="40" width="40">
-         = 7+ citations 
-      </p>
+    <div class="container-fluid mb-3">
+      <div class="row align-items-center">
+        <div class="col">
+          <img src="static/green-marker-sm.png" 
+          alt="green map marker" height="40" width="40">
+           = 0 citations
+        </div>
+        <div class="col">
+          <img src="static/yellow-marker-sm.png" 
+          alt="yellow map marker" height="40" width="40">
+           = 1 - 2 citations
+        </div>
+        <div class="col">
+          <img src="static/orange-marker-sm.png" 
+          alt="orange map marker" height="40" width="40">
+           = 3 - 6 citations
+        </div> 
+        <div class="col">
+          <img src="static/red-marker-sm.png" 
+          alt="red map marker" height="40" width="40">
+           = 7+ citations 
+        </div>
+      </div>
     </div>
   </div>
 
@@ -137,7 +138,9 @@
 
         const map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 37.8, lng: -120},
-          zoom: 6
+          zoom: 6,
+          streetViewControl: false,
+          mapTypeControl: false
         });
 
         console.log(">>>>>> Map complete, now creating icons");
@@ -238,13 +241,12 @@
 
         $("#loading").css("display", "block");
         // JQuery to show loading when filtered map begins to load
-        
-        $("#filter-legend").css("display", "block");
-        // JQuery to show legend when filter form clicked
 
         const map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 37.8, lng: -120},
-          zoom: 6
+          zoom: 6,
+          streetViewControl: false,
+          mapTypeControl: false
         });
 
         console.log("Icon complete, now fetching data from form")

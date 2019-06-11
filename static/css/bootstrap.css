@@ -1,0 +1,64 @@
+/*    .nav-link {
+        background-color: rgba(255,255,255,0.5);
+    }*/
+.navbar {
+    background-color: rgba(255,255,255,0.7);
+}
+.navbar-brand { /* forest green -- navbar brand */
+    color: rgba(3,166,90,1);
+}
+h1 { /* forest green -- navbar brand */
+    color: rgba(3,166,90,1);
+}
+.nav-link { /* deep blue -- navbar links */
+    color: rgba(3,76,140,1);
+}
+a { /* deep blue -- hyperlinks */
+    color: rgba(3,76,140,1);
+}
+.btn-outline {
+    color: rgba(3,76,140,1);
+    border-color: rgba(3,76,140,1);
+    background-color: none;
+    transition: 0.2s;
+}
+.btn:hover {
+    background-color: rgba(3,76,140,1);
+    color: white;
+}
+
+.top-0 {
+    position: absolute;
+    top: 0;
+}
+.bottom-left {
+    z-index: 2;
+    position: absolute;
+    bottom: 8px;
+    left: 16px;
+    color: white;
+}
+
+#home-header {
+    z-index: 1;
+    position: relative;
+}
+
+.position-relative {
+    position: relative;
+}
+
+
+/*EXTRA COLORS*/
+/*.light-green {
+    color: rgba(7,217,140,1);
+    }
+.yellow {
+    color: rgba(242,183,5,1);
+}
+.pink {
+    color: rgba(210,84,152,1);
+}
+.orange {
+    color: rgba(235, 92, 57,1);
+}*/

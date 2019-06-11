@@ -2,65 +2,48 @@
 <html>
 
 <head>
-  <title>CA Child Care Centers: Licensing Info</title>
+  <title>CA Child Care Search</title>
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link
+    href="/static/css/bootstrap.css"
+    rel="stylesheet"
+  >
   {% block head %}
 
   {% endblock %}
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"/>
-  <style>
-    .nav-link {
-      background-color: rgba(0,128,0,0.3);
-    }
-    #nav-bar {
-      background-color: rgba(0,0,60,1);
-    }
-  </style>
-
-  
-  <!-- LOOK INTO: inserting html from another file https://github.com/LexmarkWeb/csi.js -->
 </head>
 
   <body> 
-    <div id="nav-bar">
-      <ul class="nav nav-pills">
-        <li class="nav-item">
-          <a class="nav-link" href="/">CA Child Care Centers: Licensing Info</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/map">Map</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/facilities">Facilities</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/citations">Citations</a>
-        </li>
-      </ul>
-    </div>
-    
-    <div class="container-fluid">  
-      <div class=flash-box>
-          <!--  Flash messages display here 
-            Note -- currently no use of flash -->
 
-          {% with messages = get_flashed_messages() %}
-            {% if messages %}
-              <span class=flashes>
-              {% for message in messages %}
-                <p>{{ message }}</p>
-              {% endfor %}
-              </span>
-            {% endif %}
-          {% endwith %}
-      </div>
+    <nav class="navbar navbar-expand-md fixed-top">
+      <a class="navbar-brand" href="/">CA Child Care Search</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/">Home
+                <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/map">Map</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/facilities">Facilities</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/citations">Citations</a>
+            </li>
+          </ul>
+        </div>
+    </nav>
 
-      <h3><a href="/">CA Child Care Centers: Licensing Info</a></h3>
-      <hr>
+<!-- Need to fix the nav bar collapse -->
 
-    </div>
-
-
-    {% block content %} fill in content here {% endblock %}
+  {% block content %} fill in content here {% endblock %}
 
     
   </body>
