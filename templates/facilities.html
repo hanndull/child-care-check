@@ -1,20 +1,131 @@
 {% extends 'base.html' %}
+
+{% block head %}
+
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+{% endblock %}
+
 {% block content %}
 
 <main>
+    
     <div class="container-fluid">
-
-        <h1>CA Child Care Center Facilities</h1>
-
-        <h4>Number of Facilities: {{ num_facilities }} | Note that this list does not include home-based facilities.</h4>
+        <div class="row">
             
-            {% for facility in facilities %}
-                <p><a href="/facilities/{{ facility.f_id }}">
-                    {{ facility.name }}
-                </a></p>
-            
-            {% endfor %}
+            <div class="col-8">
+                <div class="container-fluid">
 
+                    <div id="no-results">
+                      <h3>Sorry, there are no results that match your search. Please try again.</h3>
+                    </div>
+
+                    <h1>CA Child Care Center Facilities</h1>
+
+                    <h4 id="num-facilities">Number of Facilities: {{ num_facilities }} | Note that this list does not include home-based facilities.</h4>
+                        <div id="printed-facilities">
+                        {% for facility in facilities %}
+                            <p><a href="/facilities/{{ facility.f_id }}">
+                                {{ facility.name }}
+                            </a></p>
+                        
+                        {% endfor %}
+                        </div>
+
+                </div>
+            </div>
+
+            <div class="container col-4" id="filters">
+
+                <h2>Search With Filters</h2>
+
+                    <form id="filter-form">
+                
+                        <div class="form-group row">      
+                            <label for='name'>Facility Name </label>
+                            <div class="col">
+                                <input class='form-control form-control-sm' id='name' type='text' name='name' placeholder='ex: Center Name'>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">  
+                            <label for='city'>Facility City </label>
+                            <div class="col">
+                                <input class='form-control form-control-sm' id='city' type='text' name='city' placeholder='ex: San Francisco'>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for='type-select'>Facility Type </label>
+                            <div class="col">
+                                <select class='form-control form-control-sm' id='type-select' name='type'>
+                                    <option value="prek">Day Care Center - PreK</option>
+                                    <option value="school">School Age Day Care Center</option>
+                                    <option value="infant">Infant Center</option>
+                                    <option value="ill">Day Care Center - Ill</option>
+                                    <option value="">All Center Types</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for='status-select'>Facility Status </label>
+                            <div class="col">
+                                <select class='form-control form-control-sm' id='status-select' name='status'>
+                                    <option value="licensed">Licensed</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="probation">On Probation</option>
+                                    <option value="closed">Closed</option>
+                                    <option value="">All Statuses</option> 
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 form-group row">
+                            <input type='submit' value='Search!' class='btn btn-outline'>
+                        </div>
+
+                    </form><br>
+
+                    <img class="square" src="https://cdn.pixabay.com/photo/2017/06/16/07/26/under-construction-2408059_960_720.png">
+
+                    <a class="btn btn-map btn-outline btn-lg btn-block mt-5" href="/map" role="button">Use Our Map to Filter and Search</a>
+            </div>
+        </div>
     </div>
+
 </main>
+
+<script>
+
+    $("#filter-form").submit((event) => {
+    // JQuery event listener for click on submit of form
+
+      event.preventDefault();
+
+      $("#no-results").css("display", "none");
+
+      filterFacilities();
+    });
+
+    const formData = $("#filter-form").serialize();
+        // Store all input from form fields in a string 
+
+    $.get('/filter-results.json', {formData}, (data) => {
+        // Ajax call for JSON of query, using formData (form field info)
+                  
+        if (data.count === 0) {
+            $("#no-results").css("display", "block");
+            // If no results, prompts user to try again
+            return
+        }
+
+        $("#printed-facilities").replaceWith("***test***");
+    }
+
+
+
+</script>
+
 {% endblock %}

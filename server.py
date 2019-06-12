@@ -32,6 +32,13 @@ def show_home():
     return render_template('home.html')
 
 
+@app.route('/about')
+def show_about():
+    """Render About page"""
+
+    return render_template('about.html')
+
+
 @app.route('/facilities')
 def show_facilities():
     """Facilities page"""
@@ -130,19 +137,45 @@ def retrieve_filter_coords():
         return 
 
 
-@app.route('/home-map.json')
-def process_home_form():
-    """Recieve and store filtration input into JSON for homepage map"""
+@app.route('/multi-filter.json')
+def process_facilities():
+    """Recieve and store filtration input into JSON for homepage map
+    and for use on /facilities page filter buttons
+    """
     
+    name = request.args.get('name')
+    city = request.args.get('city')
+    status = request.args.get('status')
+    f_type = request.args.get('type')
+
     fquery = Facility.query ### Base query
 
-    fquery = fquery.filter(Facility.city == 'SAN FRANCISCO')            
+    if name:
+            name = name.upper()
+            fquery = fquery.filter(Facility.name.like(f'%{name}%')
+                )
+    
+    if not city:
+        city = 'SAN FRANCISCO'
+    if city:
+            city = city.upper()
+            fquery = fquery.filter(Facility.city.like(f'%{city}%')
+                )
+    
+    if not status:
+        status = 'LICENSED'
+    if status:
+        status = status.upper()
+        if status == 'PROBATION':
+            status = 'ON PROBATION'
+        fquery = fquery.filter(Facility.status == status)             
 
     fquery = fquery.filter(Facility.status == 'LICENSED')
 
     facilities = fquery.all() ### Conglomerate all queries
     
-    facilities_dict = {}
+    facility_count = len(facilities)
+    facilities_dict = {"count": facility_count}
 
     for facility in facilities:     
         mapinfo = {
@@ -152,7 +185,7 @@ def process_home_form():
                     "status": facility.status,
                     "citation_count": len(facility.citations),
                     }
-        facilities_dict[facility.f_id] = mapinfo 
+        facilities_dict[str(facility.f_id)] = mapinfo 
         ### must stringify for comparison of f_id to "count"
     
     return jsonify(facilities_dict)

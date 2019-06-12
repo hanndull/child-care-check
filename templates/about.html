@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<main>
+
+    <div class="container-fluid position-relative mb-5">
+        <div class="row justify-content-around">
+            <div class="col-4 order-sm-1">
+                <h1>About</h1>
+                <h2><a href="/">Child Care Check</a></h2>
+                <p>This site is built based off of data from the <a href="https://secure.dss.ca.gov/CareFacilitySearch/Search/ChildCare">California Department of Social Services</a>. It highlights data on child care centers' adherence to licensing within the state of CA. The information on this site was last updated on May 15, 2019. If you need to ensure info is up-to-date, please visit <a href="https://secure.dss.ca.gov/CareFacilitySearch/Search/ChildCare">the CA state website</a> from which this data was retrieved.</p>
+            </div>
+
+            <div class="col-4 order-sm-3">
+                <h1>About</h1>
+                <h2>The Developer</h2>
+                <p><a href="https://www.linkedin.com/in/hannah-johnson-profile/">Hannah Johnson</a> created this site as a <a href="https://hackbrightacademy.com/software-engineering-program/">Hackbright Academy Software Engineering Program</a> project in May - June of 2019. Reflecting on her past experience as a preK teacher, she realized that licensing and citation info for child care facilities is not especially easy to access and digest. She decided to create a more user-friendly site to improve accessibility. With Child Care Check you can <a href="/map">filter by data on adherence to state licensing, location, and facility name/key words</a>.</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-around mt-2">
+            <div class="col-4 order-sm-2">
+                <img class="square" src="https://cdn.pixabay.com/photo/2014/04/02/11/01/tick-305245_960_720.png">
+            </div>
+
+            <div class="col-4 order-sm-4">
+                <a href="https://www.linkedin.com/in/hannah-johnson-profile/">
+                    <img class="profile" src="/static/hjohnson-sm.jpg">
+                </a>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mt-5 mb-5">
+            <div class="col-3">
+                <a class="btn btn-outline" href="/map" role="button">Search By Map</a>
+            </div>
+            <div class="col-3">
+                <a class="btn btn-outline" href="/facilities" role="button">View All Centers</a>
+            </div>
+            <div class="col-3">
+                <a class="btn btn-outline" href="/citations" role="button">Common Citations</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

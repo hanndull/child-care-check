@@ -90,7 +90,27 @@ a:hover {
     padding-left: 30px;
     padding-top: 20px;
 }
+img.profile {
+    border-radius: 50%;
+    margin: auto;    
+    display: block;
+    width: 250px; 
+    height: 250px;
+}
+img.square {
+    margin: auto;    
+    display: block;
+    width: 250px; 
+    height: 250px;
+}
+#loading {
+  text-align: center;
+  display: none;
+}
 
+#no-results {
+  display: none;
+}
 /*EXTRA COLORS*/
 .green {
     background: rgba(7,217,140,1);
