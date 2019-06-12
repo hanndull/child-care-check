@@ -5,15 +5,35 @@
 
 <main>
     <div class="container-fluid">
-        <h1>Common Citations in CA Child Care Center Facilities</h1>
 
-        <h3>The following standard codes are the top cited in California. Click on them to learn more.</h3>
+    </div>
 
-            {% for definition in cit_defs %}
-                <p><a href="/citations/{{ definition.cd_id }}">
-                    {{ definition.code }}
-                </a></p>
-            {% endfor %}
+    <div class="container-fluid position-relative mb-5">
+        <div class="row ml-5">
+            
+            <div class="col">
+                <h1>Common Citations in CA Child Care Center Facilities</h1>
+
+                <h3>The following standard codes are the top cited in California. Click on them to learn more.</h3>
+            </div>
+        </div>
+
+        <div class="row mt-3 ml-5">
+
+            <div class="col">
+                {% for definition in cit_defs %}
+                    <p><a href="/citations/{{ definition.cd_id }}">
+                        {{ definition.code }}
+                    </a></p>
+                {% endfor %}
+            </div>
+
+            <div class="col">
+                
+                <img src="/static/open-book.png" width="200" height="200">
+
+            </div>
+        </div>
     </div>
 </main>
 
