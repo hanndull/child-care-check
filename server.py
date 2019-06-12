@@ -130,6 +130,34 @@ def retrieve_filter_coords():
         return 
 
 
+@app.route('/home-map.json')
+def process_home_form():
+    """Recieve and store filtration input into JSON for homepage map"""
+    
+    fquery = Facility.query ### Base query
+
+    fquery = fquery.filter(Facility.city == 'SAN FRANCISCO')            
+
+    fquery = fquery.filter(Facility.status == 'LICENSED')
+
+    facilities = fquery.all() ### Conglomerate all queries
+    
+    facilities_dict = {}
+
+    for facility in facilities:     
+        mapinfo = {
+                    "title": facility.name,
+                    "lat": facility.latitude, 
+                    "lng": facility.longitude,
+                    "status": facility.status,
+                    "citation_count": len(facility.citations),
+                    }
+        facilities_dict[facility.f_id] = mapinfo 
+        ### must stringify for comparison of f_id to "count"
+    
+    return jsonify(facilities_dict)
+
+
 @app.route('/filter-results.json')
 def process_form():
     """Recieve and store filtration input into JSON"""
@@ -223,8 +251,6 @@ def process_form():
     facilities = fquery.all() ### Conglomerate all applicable queries
     testquery = testquery.all()
     testquery_count = len(testquery)
-    
-    ### TODO -- consider setting to user location, if no filter params given
 
     facility_count = len(facilities)
     

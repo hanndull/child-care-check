@@ -1,42 +1,116 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<style>
 
+<style>
+    #map {
+      height: 300px;
+      width: 100%;
+    }
 </style>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
 {% endblock %}
 
 {% block content %}
-<main class="homepg">
-<div class="position-relative">
-    <img src="/static/readinggroup.jpg" class="img-fluid" alt="Preschool-age children reading with a teacher" id="home-header">
-    <!-- Image from: https://www.actforchildren.org/wp-content/uploads/2015/09/Opening-CC-Program-PAGE-HEADER.jpg --> 
-</div>
 
-<div class="container-fluid position-relative mt-5 d-flex justify-content-center">
-    <div class="row">
-        <div class="col">
-            <div class="row">
-                <h1><img src="https://cdn.pixabay.com/photo/2014/04/02/11/01/tick-305245_960_720.png" height="25" width="25">Child Care Check<span class="nestedh2">: Search For Quality CA Child Care Centers</span></h1>
+<main class="homepg">
+    <div class="position-relative">
+        <img src="/static/readinggroup.jpg" class="img-fluid" alt="Preschool-age children reading with a teacher" id="home-header">
+        <!-- Image from: https://www.actforchildren.org/wp-content/uploads/2015/09/Opening-CC-Program-PAGE-HEADER.jpg --> 
+    </div>
+
+    <div class="container-fluid position-relative mt-5 d-flex justify-content-center">
+        <div class="row">
+            <div class="col">
+                <div class="row">
+                    <h1><img src="https://cdn.pixabay.com/photo/2014/04/02/11/01/tick-305245_960_720.png" height="25" width="25">Child Care Check<span class="nestedh2">: Search For Quality CA Child Care Centers</span></h1>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="container-fluid position-relative mt-5">
-    <div class="row justify-content-center">
-        <div class="col-3">
-            <a class="btn btn-grn btn-outline" href="/map" role="button">Search By Map</a>
-        </div>
-        <div class="col-3">
-            <a class="btn btn-yw btn-outline" href="/facilities" role="button">View All Centers</a>
-        </div>
-        <div class="col-3">
-            <a class="btn btn-orng btn-outline" href="/citations" role="button">Common Citations</a>
+    <div class="container-fluid position-relative mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-6">
+                <a class="btn btn-map btn-outline btn-lg btn-block" href="/map" role="button">Use Our Map to Filter and Search</a>
+            </div>
         </div>
     </div>
-</div>
+
+    <a href="/map">
+        <div id="map" class="mb-3">
+            <script>
+                function initBaseMap() {
+                // Renders Google Map from saved JSON of all facilities
+
+                const map = new google.maps.Map(document.getElementById('map'), {
+                  center: {lat: 37.7936928, lng: -122.4553518},
+                  zoom: 13,
+                  streetViewControl: false,
+                  mapTypeControl: false
+                });
+
+                console.log(">>>>>> Map complete, now creating icons");
+
+                $.getJSON('/home-map.json', (data) => { // Ajax call for JSON from file
+
+                    let image = 'static/green-marker.PNG';
+
+                    for (const f_id in data) {
+
+                        const citationCount = parseInt(data[f_id]['citation_count'])
+
+                        if (data[f_id]['citation_count'] === 0) {
+                                image = 'static/green-marker-sm.png';
+                            } else if (data[f_id]['citation_count'] > 6) {
+                                image = 'static/red-marker-sm.png';
+                            } else if (data[f_id]['citation_count'] > 2 && data[f_id]['citation_count'] < 7) {
+                                image = 'static/orange-marker-sm.png';
+                            } else {
+                                image = 'static/yellow-marker-sm.png';
+                            }
+
+                        const marker = new google.maps.Marker({ 
+                            icon: {url: image,
+                                scaledSize: new google.maps.Size(40, 40)},
+                            map: map,
+                            position: {
+                                lat: parseFloat(data[f_id]['lat']),
+                                lng: parseFloat(data[f_id]['lng'])
+                            },
+                            title: data[f_id]['title']
+                        });
+                    }
+                    console.log(">>>>>> Now exited for loop");
+                });
+                console.log(">>>>>> Completed load")
+              }
+            </script>
+        </div>
+    </a>
+
+    <div class="container-fluid position-relative mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-3">
+                <a class="btn btn-outline" href="/map" role="button">Search By Map</a>
+            </div>
+            <div class="col-3">
+                <a class="btn btn-outline" href="/facilities" role="button">View All Centers</a>
+            </div>
+            <div class="col-3">
+                <a class="btn btn-outline" href="/citations" role="button">Common Citations</a>
+            </div>
+        </div>
+    </div>
+
+
 </main>
 
-{% endblock %}
 
+<script async defer 
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U&callback=initBaseMap">
+</script>
+
+{% endblock %}
