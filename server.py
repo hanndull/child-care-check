@@ -427,6 +427,6 @@ if __name__ == "__main__":
     connect_to_db(app)
 
     # enables use of DebugToolbar
-    DebugToolbarExtension(app)
+    # DebugToolbarExtension(app)
     # import pdb; pdb.set_trace()
     app.run(port=5000, host='0.0.0.0')

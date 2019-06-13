@@ -32,6 +32,10 @@ main {
 main.homepg {
     padding-top: 56px;
 }
+.tagline {
+    color: rgba(3,76,140,1);
+    font-style: italic;
+}
 .footer {
     position: absolute;
     bottom: 0;
@@ -90,6 +94,14 @@ a:hover {
     padding-left: 30px;
     padding-top: 20px;
 }
+img.profile-flipped {
+    border-radius: 50%;
+    margin: auto;    
+    display: block;
+    width: 250px; 
+    height: 250px;
+    transform: scaleX(-1);
+}
 img.profile {
     border-radius: 50%;
     margin: auto;    
@@ -100,16 +112,16 @@ img.profile {
 img.square {
     margin: auto;    
     display: block;
-    width: 250px; 
-    height: 250px;
+    width: 200px; 
+    height: 200px;
 }
 #loading {
-  text-align: center;
-  display: none;
+    text-align: center;
+    display: none;
 }
 
 #no-results {
-  display: none;
+    display: none;
 }
 /*EXTRA COLORS*/
 .green {
@@ -139,4 +151,33 @@ img.square {
 .drk-grn {
     background: rgba(3,166,90,1);
     height: 15px;
+}
+
+/*FLIP PHOTO*/
+.flip-box {
+  background-color: transparent;
+  width: 250px;
+  height: 250px;
+}
+/* This container is needed to position the front and back side */
+.flip-box-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+/* Do an horizontal flip when you move the mouse over the flip box container */
+.flip-box:hover .flip-box-inner {
+  transform: rotateY(180deg);
+}
+.flip-box-front, .flip-box-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+.flip-box-back {
+  transform: rotateY(180deg);
 }
