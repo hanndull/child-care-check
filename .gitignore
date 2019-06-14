@@ -1,8 +1,6 @@
 env/
 *pyc*
 *.DS_Store*
-excel/
-notes.txt
-seed2.py
-geocode_fails.txt
-old-markers/
+*secrets.sh*
+seed.py
+filter-results.html
