@@ -14,14 +14,14 @@ class Facility(db.Model):
     f_type = db.Column(db.String, nullable=False)
     number = db.Column(db.String, nullable=False)
     name = db.Column(db.String, nullable=False)
-    phone = db.Column(db.String, nullable=True) # TODO - check on phone num as str
+    phone = db.Column(db.String, nullable=True) 
     address = db.Column(db.String, nullable=False) 
     city = db.Column(db.String, nullable=False)
     state = db.Column(db.String, nullable=False)
     f_zip = db.Column(db.Integer, nullable=False) 
     county = db.Column(db.String, nullable=True)
-    capacity = db.Column(db.String, nullable=False) #TODO - change back to int
-    no_complaints = db.Column(db.String,nullable=False) #TO DO - update this field
+    capacity = db.Column(db.String, nullable=False) 
+    no_complaints = db.Column(db.String,nullable=False) 
     status = db.Column(db.String, nullable=False)
     latitude = db.Column(db.String, nullable=True)
     longitude = db.Column(db.String, nullable = True)
@@ -90,7 +90,6 @@ class Citation(db.Model):
     visitations = db.relationship('Visitation', backref='citations')
     cit_definitions = db.relationship('CitationDefinition', backref='citations')
     facilities = db.relationship('Facility', backref='citations', lazy='joined')
-        ### ADDED IN: "lazy='joined', 6/5"
 
     def __repr__(self):
         """Info about citation"""

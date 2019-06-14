@@ -1,9 +1,4 @@
-/*    .nav-link {
-        background-color: rgba(255,255,255,0.5);
-    }*/
 .nav-opaque {
-    /*background: linear-gradient(to left, #f9d1d4, #d3cdec);*/
-    /*background-color: rgba(255,255,255,0.7);*/
     background-color: rgba(252,234,179,1);
 }
 .nav-translucent {
@@ -85,7 +80,6 @@ a:hover {
 }
 #home-header {
     z-index: 1;
-    /*position: relative;*/
 }
 .position-relative {
     position: relative;
@@ -119,7 +113,6 @@ img.square {
     text-align: center;
     display: none;
 }
-
 #no-results {
     display: none;
 }

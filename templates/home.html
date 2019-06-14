@@ -55,8 +55,6 @@
                   mapTypeControl: false
                 });
 
-                console.log(">>>>>> Map complete, now creating icons");
-
                 $.getJSON('/multi-filter.json', (data) => { // Ajax call for JSON from file
 
                     let image = 'static/green-marker.PNG';
@@ -86,9 +84,7 @@
                             title: data[f_id]['title']
                         });
                     }
-                    console.log(">>>>>> Now exited for loop");
                 });
-                console.log(">>>>>> Completed load")
               }
             </script>
         </div>

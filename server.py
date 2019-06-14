@@ -11,7 +11,6 @@ from model import connect_to_db, db, Facility, Visitation, Citation, CitationDef
 from sqlalchemy import func, distinct
 from dateutil.parser import isoparse
 import requests
-import time
 import json
 import os
 
@@ -101,7 +100,6 @@ def pass_json_to_js():
 
     with open('data.txt') as file:  
         data = file.read()
-        print ('>>>>>>>>> Now returning data')
         
         return data
 
@@ -129,8 +127,6 @@ def retrieve_filter_coords():
         
         lat = answer.get('geometry').get('location').get('lat')
         lng = answer.get('geometry').get('location').get('lng')
-
-        print('>>>>>>>>>>>>>', lat, lng)
 
         return jsonify({"lat": lat, "lng": lng})
 
@@ -196,8 +192,6 @@ def process_facilities():
 def process_form():
     """Recieve and store filtration input into JSON"""
 
-    print(">>>>>>> At top of process_form function")
-
     name = request.args.get('name')
     zipcode = request.args.get('zipcode')
     city = request.args.get('city')
@@ -207,10 +201,8 @@ def process_form():
     suppress_date = request.args.get('suppress_date')
     f_type = request.args.get('type')
     page_num = request.args.get('page_num') ### For use in pagination
-
-    print (">>>>>> Completed request.args")
     
-    fquery = Facility.query #.options(db.joinedload('citations')) ### Base query
+    fquery = Facility.query ### Base query
 
 
     if name or zipcode or city or min_cit or max_cit or status or suppress_date or f_type:
@@ -288,11 +280,6 @@ def process_form():
 
     facility_count = len(facilities)
     
-    print("~~~~~~~~ TOTAL FOR OVERALL QUERY:", testquery_count)
-    start = time.time()
-    print(">>>>>> CURRENTLY PROCESSING INTO JSON: ", facility_count)
-
-    
     facilities_dict = {"count": facility_count}
 
     for facility in facilities:     
@@ -305,9 +292,6 @@ def process_form():
                     }
         facilities_dict[str(facility.f_id)] = mapinfo 
         ### must stringify for comparison of f_id to "count"
-    
-    end = time.time()
-    print(end, "Time elapsed: ", end - start)
     
     return jsonify(facilities_dict)
 
@@ -328,29 +312,12 @@ def create_map_json():
     for facility in facilities_list:     
         citation_count = len(facility.citations)
 
-        if citation_count == 0:
-            fill_color = "DarkGreen"
-            #"zero"
-
-        elif citation_count > 6:
-            fill_color = "Crimson"    
-            # "sevenAndMore"
-
-        elif citation_count > 2 and citation_count < 7:
-            fill_color = "OrangeRed"
-            # "threeToSix"
-
-        else:
-            fill_color = "Gold"
-            # "oneOrTwo"
-
         mapinfo = {
                     "title": facility.name,
                     "lat": facility.latitude, 
                     "lng": facility.longitude,
                     "status": facility.status,
                     "citation_count": citation_count,
-                    "fillColor": fill_color,
                     }
 
         facilities[str(facility.f_id)] = mapinfo
@@ -358,7 +325,7 @@ def create_map_json():
     with open('data.txt', 'w') as outfile:  
         json.dump(facilities, outfile)
     
-    return "woohoo"
+    return "Production of JSON was a success"
 
 
 ##### For Geocoding ##########################################################

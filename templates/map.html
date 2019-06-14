@@ -174,8 +174,6 @@
                 mapTypeControl: false
               });
 
-              console.log(">>>>>> Map complete, now creating icons");
-
               // Try HTML5 geolocation.
               // from https://developers.google.com/maps/documentation/javascript/examples/map-geolocation
               if (navigator.geolocation) {
@@ -252,9 +250,7 @@
                     infowindow.open(map, marker)
                   });
                 }
-                console.log(">>>>>> Now exited for loop");
               });
-              console.log(">>>>>> Completed load")
             }
 
 
@@ -280,19 +276,11 @@
                 mapTypeControl: false
               });
 
-              console.log("Icon complete, now fetching data from form")
-
               const formData = $("#filter-form").serialize()
               // Store all input from form fields in a string 
 
-              console.log("Form fetch complete, now processing data")
-
               function getPage(counter = 1) {
                 // function to help with pagination
-                
-                console.log(counter);
-                
-                console.log(">>>>> formData", `${formData}&page_num=${counter}`);
 
                 $.get('/filter-results.json', `${formData}&page_num=${counter}`, (data) => {
                   // Ajax call for JSON of query, using formData (form field info)
@@ -316,9 +304,6 @@
 
                     $.get('/get-filter-geocode.json', formData, (data) => {
                       // Google Geocoding API call for city to get coordinates + zoom
-                      
-                      console.log("formData = ", formData);
-                      console.log("data = ", data);
                     
                       const pos = {lat: data['lat'], lng: data['lng']};
                       
@@ -331,8 +316,6 @@
 
                   for (const f_id in data) {
                     // success callback function to create marker and window for ea facility
-                    
-                    console.log("Now within for loop for marker and window creation");
 
                     if (data[f_id]['citation_count'] === 0) {
                       image = 'static/green-marker-sm.png';
@@ -377,11 +360,7 @@
                       infowindow.open(map, marker)
                     });
                   }
-
-                  console.log("Now exited for loop");
-                  
                   getPage(counter + 1);
-
                 });
               }
               getPage(); // Call the overall function to initiate loading of map markers
