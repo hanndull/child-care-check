@@ -13,12 +13,13 @@ from dateutil.parser import isoparse
 import requests
 import time
 import json
+import os
 
 ##### Create App #############################################################
 
 app = Flask(__name__)
 
-app.secret_key = "Hannah"
+app.secret_key = os.environ['APP_KEY'] #importOS, key will not be listed here directly, file name w/ key will be here
 
 # Raise an error for an undefined variable in Jinja
 app.jinja_env.undefined = StrictUndefined
