@@ -2,72 +2,102 @@
 {% block content %}
 
 <main>
+<div class="container-fluid ml-5 mt-2">
+
     <div class="container-fluid">
-        <h2>{{ facility.name }}</h2>
+        <h1>{{ facility.name }}</h1>
+    </div>
+
+    <div class="container-fluid mt-4 mb-4">
         <h4>
             {{ facility.address }}, {{ facility.city }}, {{ facility.state }} {{ facility.f_zip }}<br>
             Licensing Status: {{ facility.status }} | Capacity: {{ facility.capacity }} children
         </h4>
+    </div>
+
+    <div class="container-fluid">
         <p><a href={{ f_url }} target="_blank">Learn More About This Facility on the 
         CA Dept of Social Services Website</a></p>
+    </div>
 
 
-        <h3>Visitations and Inspections --</h3>
+    <div class="container-fluid row mt-4">
+
+        <div class="col-5">
+            <h2>Citations</h2>
+
+                {% if facility.citations %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Licensing Regulation Code</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                    {% for citation in facility.citations|sort(attribute='date', reverse = True) %}
+                        
+                            <tr>
+                                <th scope="row"><b>{{ citation.date.strftime('%Y-%m-%d') }}</b></th> 
+                                {% if citation.cd_id %}
+                                    <td><a href="/citations/{{ citation.cd_id }}">{{ citation.code }}</a></td>
+                                {% else %}
+                                    <td>{{ citation.code }}</td>
+                                {% endif %}
+                            </tr>
+                    {% endfor %}
+                        </tbody>
+                
+                {% else %}
+                    <p>This facility has received no licensing citations.</p>
+                {% endif %}
+                    </table>
+        </div>
+
+        <div class="col-5">
+            <h2>Visitations and Inspections</h2>
+
             {% if facility.visitations %}
-                <ul>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Visitation?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                          
                 {% for visit in facility.visitations|sort(attribute='date', reverse = True) %}
                 <!-- sorted lists using: https://stackoverflow.com/a/39051279 -->
-
-                    <li>
-                        <b>{{ visit.date.strftime('%Y-%m-%d') }}:</b> 
-                        <b>Was an inspection?</b> 
-                            {% if visit.is_inspection == 'true' %}
-                                yes
-                            {% else %}
-                                no
-                            {% endif %}
-                    </li>
+                        <tr>
+                            <th scope="row"><b>{{ visit.date.strftime('%Y-%m-%d') }}</b></th> 
+                        {% if visit.is_inspection == 'true' %}
+                            <td>yes</td>
+                        {% else %}
+                            <td>no</td>
+                        {% endif %}
+                        </tr>
                 {% endfor %}
-                </ul>
+                    </tbody>
+
             {% else %}
                 <p>This facility has received no licensing visits or inspections.</p>
             {% endif %}
+                </table>
+        </div>
+    </div>
 
-
-        <h3>Complaints --</h3>    
+    <div class="container-fluid mb-5 mt-2">
+        <h2>Complaints</h2>    
             {% if facility.no_complaints %}
                 <p>This facility has received no complaints.</p>
             {% else %}
                 <p>This facility has a history of complaints.</p>
             {% endif %}
-
-
-        <h3>Citations --</h3>
-            {% if facility.citations %}
-                <ul>
-                {% for citation in facility.citations|sort(attribute='date', reverse = True) %}
-                    
-                    <li>
-                        <b>{{ citation.date.strftime('%Y-%m-%d') }}:</b> 
-                            {% if citation.cd_id %}
-                                <a href="/citations/{{ citation.cd_id }}">{{ citation.code }}</a>
-                            {% else %}
-                                {{ citation.code }}
-                            {% endif %}
-                    </li>
-
-                {% endfor %}
-                </ul>
-            {% else %}
-                <p>This facility has received no licensing citations.</p>
-            {% endif %}
-
-
-
-        <h3><a href="/facilities">View List of All Facilities</a> | 
-            <a href="/map">View Map and Filters</a></h3>
-
     </div>
+
+</div>
 </main>
 
 {% endblock %}
