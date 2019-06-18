@@ -388,7 +388,6 @@ if __name__ == "__main__":
     
     # debug must be True at time DebugToolbarExtension invoked
     #app.debug = True
-    app.run()
     
     # ensures templates, etc. are not cached in debug mode
     #app.jinja_env.auto_reload = app.debug
