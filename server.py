@@ -18,7 +18,8 @@ import os
 
 app = Flask(__name__)
 
-app.secret_key = os.environ['APP_KEY'] #importOS, key will not be listed here directly, file name w/ key will be here
+app.secret_key = os.environ['APP_KEY'] ### Store key in secrets.sh
+### must run `source secrets.sh` in ea new shell where you want to run server
 
 # Raise an error for an undefined variable in Jinja
 app.jinja_env.undefined = StrictUndefined
@@ -386,10 +387,10 @@ def send_geocode_request():
 if __name__ == "__main__":
     
     # debug must be True at time DebugToolbarExtension invoked
-    app.debug = True
+    #app.debug = True
     
     # ensures templates, etc. are not cached in debug mode
-    app.jinja_env.auto_reload = app.debug
+    #app.jinja_env.auto_reload = app.debug
 
 
     connect_to_db(app)
