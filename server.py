@@ -121,7 +121,7 @@ def retrieve_filter_coords():
         url_insert = (f"CA+{zipcode}")
 
     geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={url_insert}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
-    app.logger.info(">>> GEOCODE URL", geocode_url)
+    app.logger.info(f">>> GEOCODE URL {geocode_url}")
     results = requests.get(geocode_url)
     results = results.json()
     app.logger.info(">>> RESULTS", results)
