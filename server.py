@@ -13,7 +13,7 @@ from dateutil.parser import isoparse
 import requests
 import json
 import os
-import logging 
+import sys
 
 ##### Create App #############################################################
 
@@ -121,13 +121,13 @@ def retrieve_filter_coords():
         url_insert = (f"CA+{zipcode}")
 
     geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={url_insert}&key=AIzaSyAw0meNSqLUJr9iQ0JLsC0b0xXxwBLrP_U")
-    app.logger.info(f">>> GEOCODE URL {geocode_url}")
+    print(f">>> GEOCODE URL {geocode_url}", file=sys.stderr)
     results = requests.get(geocode_url)
     results = results.json()
-    app.logger.info(">>> RESULTS", results)
+    #app.logger.info(">>> RESULTS", results)
 
     if len(results['results']) != 0:
-        app.logger.info(">>> INSIDE IF")
+        #app.logger.info(">>> INSIDE IF")
         answer = results['results'][0]
         
         lat = answer.get('geometry').get('location').get('lat')
