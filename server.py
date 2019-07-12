@@ -121,13 +121,11 @@ def retrieve_filter_coords():
         url_insert = (f"CA+{zipcode}")
 
     geocode_url = (f"https://maps.googleapis.com/maps/api/geocode/json?address={url_insert}&key=AIzaSyDlFREKPkL5QDTnbsWAgm-abRBK6JS3nv4")
-    print(f">>> GEOCODE URL {geocode_url}", file=sys.stderr)
+
     results = requests.get(geocode_url)
     results = results.json()
-    print(">>> RESULTS", results, file=sys.stderr)
 
     if len(results['results']) != 0:
-        print(">>> INSIDE IF", file=sys.stderr)
         answer = results['results'][0]
         
         lat = answer.get('geometry').get('location').get('lat')
