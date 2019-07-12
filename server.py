@@ -124,10 +124,10 @@ def retrieve_filter_coords():
     print(f">>> GEOCODE URL {geocode_url}", file=sys.stderr)
     results = requests.get(geocode_url)
     results = results.json()
-    #app.logger.info(">>> RESULTS", results)
+    print(">>> RESULTS", results, file=sys.stderr)
 
     if len(results['results']) != 0:
-        #app.logger.info(">>> INSIDE IF")
+        print(">>> INSIDE IF", file=sys.stderr)
         answer = results['results'][0]
         
         lat = answer.get('geometry').get('location').get('lat')
