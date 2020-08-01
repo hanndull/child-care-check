@@ -184,8 +184,8 @@ img.square {
 }
 
 .callout {
-  border-radius: 10px;
+  border-radius: 5px;
   background: rgba(3,166,90,1);
-  padding: 20px;
+  padding: 5px;
   color: white;
 }
